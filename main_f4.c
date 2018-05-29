@@ -155,7 +155,11 @@ struct boardinfo board_info = {
 	.board_rev	= 0,
 	.fw_size	= 0,
 
+#ifdef STM32F401
+	.systick_mhz	= 84,
+#else
 	.systick_mhz	= 168,
+#endif
 };
 
 static void board_init(void);
@@ -168,6 +172,16 @@ static void board_init(void);
 static const struct rcc_clock_scale clock_setup = {
 	.pllm = OSC_FREQ,
 	.plln = 336,
+#if defined(STM32F401)
+	.pllp = 4,
+	.pllq = 7,
+	.pllr = 0,
+	.hpre = RCC_CFGR_HPRE_DIV_NONE,
+	.ppre1 = RCC_CFGR_PPRE_DIV_2,
+	.ppre2 = RCC_CFGR_PPRE_DIV_NONE,
+	.flash_config = FLASH_ACR_ICE | FLASH_ACR_DCE | FLASH_ACR_LATENCY_2WS,
+	.ahb_frequency  = 84000000,
+#else
 	.pllp = 2,
 	.pllq = 7,
 #if defined(STM32F446) || defined(STM32F469)
@@ -176,8 +190,9 @@ static const struct rcc_clock_scale clock_setup = {
 	.hpre = RCC_CFGR_HPRE_DIV_NONE,
 	.ppre1 = RCC_CFGR_PPRE_DIV_4,
 	.ppre2 = RCC_CFGR_PPRE_DIV_2,
-	.power_save = 0,
 	.flash_config = FLASH_ACR_ICE | FLASH_ACR_DCE | FLASH_ACR_LATENCY_5WS,
+#endif
+	.power_save = 0,
 	.apb1_frequency = 42000000,
 	.apb2_frequency = 84000000,
 };

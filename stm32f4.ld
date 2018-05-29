@@ -37,7 +37,7 @@
 MEMORY
 {
 	rom (rx)  : ORIGIN = 0x08000000, LENGTH = 16K
-	ram (rwx) : ORIGIN = 0x20000000, LENGTH = 128K
+	ram (rwx) : ORIGIN = 0x20000000, LENGTH = 64K
 }
 
 /* Enforce emmission of the vector table. */
@@ -107,4 +107,4 @@ SECTIONS
         end = .;
 }
 
-PROVIDE(_stack = 0x20020000);
+PROVIDE(_stack = 0x20010000);

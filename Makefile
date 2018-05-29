@@ -55,7 +55,8 @@ TARGETS	= \
 	px4iov3_bl \
 	tapv1_bl \
 	cube_f4_bl \
-	cube_f7_bl
+	cube_f7_bl \
+	brainpad_bl
 
 all:	$(TARGETS) sizes
 
@@ -129,6 +130,10 @@ tapv1_bl: $(MAKEFILE_LIST) $(LIBOPENCM3)
 aerofcv1_bl: $(MAKEFILE_LIST) $(LIBOPENCM3)
 	${MAKE} ${MKFLAGS} -f  Makefile.f4 TARGET_HW=AEROFC_V1 LINKER_FILE=stm32f4.ld TARGET_FILE_NAME=$@
 
+brainpad_bl:$(MAKEFILE_LIST) $(LIBOPENCM3)
+	${MAKE} ${MKFLAGS} -f  Makefile.f4 TARGET_HW=BRAINPAD LINKER_FILE=stm32f4.ld TARGET_FILE_NAME=$@ EXTRAFLAGS=-DSTM32F401
+
+
 #
 # Show sizes
 #
@@ -158,3 +163,4 @@ checksubmodules: updatesubmodules
 updatesubmodules:
 	$(Q) (git submodule init)
 	$(Q) (git submodule update)
+

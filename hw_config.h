@@ -948,6 +948,35 @@
  * # define BOARD_FORCE_BL_PULL            GPIO_PUPD_PULLUP
 */
 
+#elif  defined(TARGET_HW_BRAINPAD)
+
+# define APP_LOAD_ADDRESS               0x08004000
+# define BOOTLOADER_DELAY               5000
+# define BOARD_OMNIBUSF4SD
+# define INTERFACE_USB                  1
+# define INTERFACE_USART                0
+# define USBDEVICESTRING                "GHI BrainPad"
+# define USBPRODUCTID                   0x1042
+
+# define BOARD_TYPE                     1042
+# define BOARD_FLASH_SECTORS            8
+# define BOARD_FLASH_SIZE               (512 * 1024)
+
+# define OSC_FREQ                       8
+
+# define BOARD_PIN_LED_ACTIVITY         GPIO6
+# define BOARD_PIN_LED_BOOTLOADER       GPIO8
+# define BOARD_PORT_LEDS                GPIOC
+# define BOARD_CLOCK_LEDS               RCC_AHB1ENR_IOPBEN
+# define BOARD_LED_ON                   gpio_clear
+# define BOARD_LED_OFF                  gpio_set
+
+# define BOARD_USB_VBUS_SENSE_DISABLED
+//# define BOARD_PIN_VBUS                 GPIO5
+//# define BOARD_PORT_VBUS                GPIOC
+
+# define USBMFGSTRING                   "GHI Electronics"
+
 #else
 # error Undefined Target Hardware
 #endif
