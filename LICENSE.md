@@ -37,6 +37,6 @@ to be made under the same license. Any exception to this general rule is listed 
 
   - libopencm3: [LGPL](https://github.com/libopencm3/libopencm3/blob/master/COPYING.LGPL3)
   - cdcacm.c:   GPL
-  - usart.c:	GPL
   - bl.c:	BSD 3-clause
   - bl.h:	BSD 3-clause
+  - UF2 stuff: MIT
