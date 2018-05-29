@@ -15,7 +15,6 @@
 # include <libopencm3/stm32/timer.h>
 
 #include "bl.h"
-#include "uart.h"
 
 /* flash parameters that we should not really know */
 static struct {
@@ -117,27 +116,6 @@ typedef struct mcu_rev_t {
 	mcu_rev_e revid;
 	char  rev;
 } mcu_rev_t;
-
-/*
- * This table is used in 2 ways. One to look look up the revision
- * of a given chip. Two to see it a revsion is in the group of "Bad"
- * silicon.
- *
- * Therefore when adding entries for good silicon rev, they must be inserted
- * at the beginning of the table. The value of FIRST_BAD_SILICON_OFFSET will
- * also need to be increased to that of the value of the first bad silicon offset.
- *
- */
-const mcu_rev_t silicon_revs[] = {
-	{MCU_REV_STM32F4_REV_3, '3'}, /* Revision 3 */
-
-	{MCU_REV_STM32F4_REV_A, 'A'}, /* Revision A */  // FIRST_BAD_SILICON_OFFSET (place good ones above this line and update the FIRST_BAD_SILICON_OFFSET accordingly)
-	{MCU_REV_STM32F4_REV_Z, 'Z'}, /* Revision Z */
-	{MCU_REV_STM32F4_REV_Y, 'Y'}, /* Revision Y */
-	{MCU_REV_STM32F4_REV_1, '1'}, /* Revision 1 */
-};
-
-#define FIRST_BAD_SILICON_OFFSET 1
 
 #define APP_SIZE_MAX			(BOARD_FLASH_SIZE - (BOOTLOADER_RESERVATION_SIZE + APP_RESERVATION_SIZE))
 

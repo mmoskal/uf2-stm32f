@@ -15,7 +15,6 @@
 # include <libopencm3/stm32/timer.h>
 
 #include "bl.h"
-#include "uart.h"
 
 /* flash parameters that we should not really know */
 static struct {

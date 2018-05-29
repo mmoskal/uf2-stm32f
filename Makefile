@@ -31,7 +31,7 @@ export FLAGS		 = -std=gnu99 \
 			   -Wl,-g \
 			   -Werror
 
-export COMMON_SRCS	 = bl.c cdcacm.c  usart.c
+export COMMON_SRCS	 = bl.c cdcacm.c usb_msc.c ghostfat.c dmesg.c
 
 #
 # Bootloaders to build
@@ -57,6 +57,8 @@ TARGETS	= \
 	cube_f4_bl \
 	cube_f7_bl \
 	brainpad_bl
+
+TARGETS	= brainpad_bl
 
 all:	$(TARGETS) sizes
 

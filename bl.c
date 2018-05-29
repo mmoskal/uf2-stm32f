@@ -52,7 +52,6 @@
 
 #include "bl.h"
 #include "cdcacm.h"
-#include "uart.h"
 
 inline void cinit(void *config, uint8_t interface) {
     if (interface == USB) {
@@ -168,6 +167,7 @@ static void led_set(enum led_state state) {
     }
 }
 
+#if 0
 static uint32_t crc32(const uint8_t *src, unsigned len, unsigned state) {
     static uint32_t crctab[256];
 
@@ -196,7 +196,9 @@ static uint32_t crc32(const uint8_t *src, unsigned len, unsigned state) {
 
     return state;
 }
+#endif
 
+#if 0
 void eraseFlash() {
     // clear the bootloader LED while erasing - it stops blinking at random
     // and that's confusing
@@ -238,6 +240,7 @@ void eraseFlash() {
     get_mcu_id();
     get_mcu_desc(len, buffer);
 }
+#endif
 
 void bootloader(unsigned timeout) {
     /* (re)start the timer system */
@@ -258,5 +261,7 @@ void bootloader(unsigned timeout) {
         if (timeout && !timer[TIMER_BL_WAIT]) {
             return;
         }
+
+		usb_callback();
     }
 }
