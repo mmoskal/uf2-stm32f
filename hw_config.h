@@ -967,9 +967,9 @@
 # define BOARD_PIN_LED_ACTIVITY         GPIO6
 # define BOARD_PIN_LED_BOOTLOADER       GPIO8
 # define BOARD_PORT_LEDS                GPIOC
-# define BOARD_CLOCK_LEDS               RCC_AHB1ENR_IOPBEN
-# define BOARD_LED_ON                   gpio_clear
-# define BOARD_LED_OFF                  gpio_set
+# define BOARD_CLOCK_LEDS               RCC_AHB1ENR_IOPCEN
+# define BOARD_LED_ON                   gpio_set
+# define BOARD_LED_OFF                  gpio_clear
 
 # define BOARD_USB_VBUS_SENSE_DISABLED
 //# define BOARD_PIN_VBUS                 GPIO5
