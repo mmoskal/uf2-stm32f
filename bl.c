@@ -128,6 +128,9 @@ void jump_to_app() {
 volatile unsigned timer[NTIMERS];
 void ghostfat_1ms();
 
+static int16_t blOn, blDl = 40, blDir = 1;
+static int ledToBlink = LED_BOOTLOADER;
+
 void sys_tick_handler(void) {
     unsigned i;
 
@@ -139,8 +142,17 @@ void sys_tick_handler(void) {
         }
 
     if ((_led_state == LED_BLINK) && (timer[TIMER_LED] == 0)) {
-        led_toggle(LED_BOOTLOADER);
-        timer[TIMER_LED] = 50;
+        if (blOn) {
+            led_off(ledToBlink);
+            timer[TIMER_LED] = blDl / 3;
+            blDl += blDir;
+            if (blDl > 60) blDir = -1;
+            else if (blDl < 20) blDir = 1;
+        } else {
+            led_on(ledToBlink);
+            timer[TIMER_LED] = 1;
+        }
+        blOn = !blOn;
     }
 }
 
@@ -201,6 +213,14 @@ static uint32_t crc32(const uint8_t *src, unsigned len, unsigned state) {
 }
 #endif
 
+void usb_enumerated() {
+    timer[TIMER_BL_WAIT] = 24*3600*1000;
+    if (ledToBlink == LED_BOOTLOADER) {
+        led_off(ledToBlink);
+        ledToBlink = LED_ACTIVITY;
+    }
+}
+
 void bootloader(unsigned timeout) {
     /* (re)start the timer system */
     systick_set_clocksource(STK_CSR_CLKSOURCE_AHB);
@@ -215,6 +235,7 @@ void bootloader(unsigned timeout) {
 
     /* make the LED blink while we are idle */
     led_set(LED_BLINK);
+    led_off(LED_ACTIVITY);
 
     while (true) {
         if (timeout && !timer[TIMER_BL_WAIT]) {

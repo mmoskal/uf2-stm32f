@@ -951,7 +951,7 @@
 #elif  defined(TARGET_HW_BRAINPAD)
 
 # define APP_LOAD_ADDRESS               0x08008000
-# define BOOTLOADER_DELAY               5000
+# define BOOTLOADER_DELAY               1000
 # define BOARD_OMNIBUSF4SD
 # define INTERFACE_USB                  1
 # define INTERFACE_USART                0
@@ -964,8 +964,8 @@
 
 # define OSC_FREQ                       8
 
-# define BOARD_PIN_LED_ACTIVITY         GPIO6
-# define BOARD_PIN_LED_BOOTLOADER       GPIO8
+# define BOARD_PIN_LED_ACTIVITY         GPIO8
+# define BOARD_PIN_LED_BOOTLOADER       GPIO9
 # define BOARD_PORT_LEDS                GPIOC
 # define BOARD_CLOCK_LEDS               RCC_AHB1ENR_IOPCEN
 # define BOARD_LED_ON                   gpio_set

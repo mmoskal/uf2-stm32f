@@ -2,6 +2,7 @@
 #include "bl.h"
 
 #include <string.h>
+#include <libopencm3/cm3/scb.h>
 
 typedef struct {
     uint8_t JumpInstruction[3];
@@ -173,7 +174,7 @@ void ghostfat_1ms() {
 
     if (resetTime && ms >= resetTime) {
         flushFlash();
-        jump_to_app();
+        scb_reset_system();
         while (1);
     }
 
@@ -247,7 +248,7 @@ int read_block(uint32_t block_no, uint8_t *data) {
                 bl->magicEnd = UF2_MAGIC_END;
                 bl->blockNo = sectionIdx;
                 bl->numBlocks = flashSize() / 256;
-                bl->targetAddr = addr;
+                bl->targetAddr =  0x08000000 + addr;
                 bl->payloadSize = 256;
                 memcpy(bl->data, (void *)addr, bl->payloadSize);
             }

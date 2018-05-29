@@ -150,6 +150,15 @@ otg_fs_isr(void)
 	}
 }
 
+void usb_enumerated();
+
+static void usb_set_config(usbd_device *usbd_dev, uint16_t wValue)
+{
+	(void)usbd_dev;
+	(void)wValue;
+	usb_enumerated();
+}
+
 void
 usb_cinit(void)
 {
@@ -208,6 +217,8 @@ usb_cinit(void)
 
 	nvic_enable_irq(NVIC_OTG_FS_IRQ);
 #endif
+
+	usbd_register_set_config_callback(usbd_dev, usb_set_config);
 }
 
 void

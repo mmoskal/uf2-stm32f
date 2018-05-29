@@ -143,7 +143,8 @@ struct boardinfo board_info = {
 
 static void board_init(void);
 
-#define BOOT_RTC_SIGNATURE          0xb007b007
+#define BOOT_RTC_SIGNATURE          0x71a21877
+#define APP_RTC_SIGNATURE           0x24a22d12
 #define POWER_DOWN_RTC_SIGNATURE    0xdeaddead // Written by app fw to not re-power on.
 #define BOOT_RTC_REG                MMIO32(RTC_BASE + 0x50)
 
@@ -508,6 +509,7 @@ static uint8_t erasedSectors[BOARD_FLASH_SECTORS];
 static bool is_blank(uint32_t addr, uint32_t size) {
 		for (unsigned i = 0; i < size; i += sizeof(uint32_t)) {
 			if (*(uint32_t*)(addr + i) != 0xffffffff) {
+				DMESG("non blank: %p i=%d/%d", addr, i, size);
 				return false;
 			}
 		}
@@ -543,7 +545,7 @@ flash_write(uint32_t dst, const uint8_t *src, int len)
 	if (!erased && !is_blank(addr, size)) {
 		flash_erase_sector(sector, FLASH_CR_PROGRAM_X32);
 		if (!is_blank(addr, size))
-			PANIC("failed to erase");
+			PANIC("failed to erase!");
 	}
 
     for (int i = 0; i < len; i += 4) {
@@ -712,7 +714,7 @@ led_toggle(unsigned led)
 int
 main(void)
 {
-	bool try_boot = true;			/* try booting before we drop to the bootloader */
+	bool try_boot = false;
 	unsigned timeout = BOOTLOADER_DELAY;	/* if nonzero, drop out of the bootloader after this time */
 
 	/* Enable the FPU before we hit any FP instructions */
@@ -760,6 +762,11 @@ main(void)
 		board_set_rtc_signature(0);
 	}
 
+	if (board_get_rtc_signature() == APP_RTC_SIGNATURE) {
+		try_boot = true;
+		board_set_rtc_signature(0);
+	}
+
 #ifdef BOOT_DELAY_ADDRESS
 	{
 		/*
@@ -795,8 +802,6 @@ main(void)
 		try_boot = false;
 	}
 
-#if INTERFACE_USB
-
 	/*
 	 * Check for USB connection - if present, don't try to boot, but set a timeout after
 	 * which we will fall out of the bootloader.
@@ -804,6 +809,7 @@ main(void)
 	 * If the force-bootloader pins are tied, we will stay here until they are removed and
 	 * we then time out.
 	 */
+#if 0
 #if defined(BOARD_USB_VBUS_SENSE_DISABLED)
 	try_boot = false;
 #else
@@ -815,35 +821,10 @@ main(void)
 #endif
 #endif
 
-#if INTERFACE_USART
-
-	/*
-	 * Check for if the USART port RX line is receiving a break command, or is being held low. If yes,
-	 * don't try to boot, but set a timeout after
-	 * which we will fall out of the bootloader.
-	 *
-	 * If the force-bootloader pins are tied, we will stay here until they are removed and
-	 * we then time out.
-	 */
-	if (board_test_usart_receiving_break()) {
-		try_boot = false;
-	}
-
-#endif
-
 	/* Try to boot the app if we think we should just go straight there */
 	if (try_boot) {
-
-		/* set the boot-to-bootloader flag so that if boot fails on reset we will stop here */
-#ifdef BOARD_BOOT_FAIL_DETECT
-		board_set_rtc_signature(BOOT_RTC_SIGNATURE);
-#endif
-
 		/* try to boot immediately */
 		jump_to_app();
-
-		// If it failed to boot, reset the boot signature and stay in bootloader
-		board_set_rtc_signature(BOOT_RTC_SIGNATURE);
 
 		/* booting failed, stay in the bootloader forever */
 		timeout = 0;
@@ -851,12 +832,7 @@ main(void)
 
 
 	/* start the interface */
-#if INTERFACE_USART
-	cinit(BOARD_INTERFACE_CONFIG_USART, USART);
-#endif
-#if INTERFACE_USB
 	cinit(BOARD_INTERFACE_CONFIG_USB, USB);
-#endif
 
 
 #if 0
@@ -871,6 +847,10 @@ main(void)
 
 	while (1) {
 		DMESG("enter bootloader, tmo=%d", timeout);
+
+		// if they hit reset the second time, go to app
+		board_set_rtc_signature(APP_RTC_SIGNATURE);
+		
 		/* run the bootloader, come back after an app is uploaded or we time out */
 		bootloader(timeout);
 
@@ -879,19 +859,7 @@ main(void)
 			continue;
 		}
 
-#if INTERFACE_USART
-
-		/* if the USART port RX line is still receiving a break, just loop back */
-		if (board_test_usart_receiving_break()) {
-			continue;
-		}
-
-#endif
-
-		/* set the boot-to-bootloader flag so that if boot fails on reset we will stop here */
-#ifdef BOARD_BOOT_FAIL_DETECT
-		board_set_rtc_signature(BOOT_RTC_SIGNATURE);
-#endif
+		board_set_rtc_signature(0);
 
 		/* look to see if we can boot the app */
 		jump_to_app();
