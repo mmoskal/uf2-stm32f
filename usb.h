@@ -31,11 +31,6 @@
  *
  ****************************************************************************/
 
-/**
- * @file cdcacm.h
- *
- * cdcacm bootloader definitions.
- */
 
 #pragma once
 

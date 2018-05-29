@@ -950,7 +950,7 @@
 
 #elif  defined(TARGET_HW_BRAINPAD)
 
-# define APP_LOAD_ADDRESS               0x08004000
+# define APP_LOAD_ADDRESS               0x08008000
 # define BOOTLOADER_DELAY               5000
 # define BOARD_OMNIBUSF4SD
 # define INTERFACE_USB                  1

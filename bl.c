@@ -51,7 +51,7 @@
 #include <libopencm3/cm3/systick.h>
 
 #include "bl.h"
-#include "cdcacm.h"
+#include "usb.h"
 
 inline void cinit(void *config, uint8_t interface) {
     if (interface == USB) {
