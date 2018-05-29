@@ -75,7 +75,7 @@ static void writeDecNum(char *buf, int32_t n)
         n /= 10;
     }
 
-    while (--i > 0) {
+    while (--i >= 0) {
         *buf++ = tmp[i];
     }
 

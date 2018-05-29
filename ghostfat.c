@@ -1,8 +1,7 @@
 
-#include "uf2.h"
+#include "bl.h"
 
 #include <string.h>
-#include "dmesg.h"
 
 typedef struct {
     uint8_t JumpInstruction[3];
@@ -114,14 +113,14 @@ static const FAT_BootBlock BootBlock = {
     .FilesystemIdentifier = "FAT16   ",
 };
 
-#define NO_CACHE 0xffffffff
+static uint32_t resetTime;
+static uint32_t ms;
 
+#ifdef FLASH_PAGE_SIZE
+#define NO_CACHE 0xffffffff
 static uint32_t flashAddr = NO_CACHE;
 static uint8_t flashBuf[FLASH_PAGE_SIZE] __attribute__((aligned(4)));
 static bool firstFlush = true;
-static bool hadWrite = false;
-static uint32_t ms;
-static uint32_t resetTime;
 static uint32_t lastFlush;
 
 static void flushFlash(void) {
@@ -151,8 +150,6 @@ static void flushFlash(void) {
 static void flash_write(uint32_t dst, const uint8_t *src, int len) {
     uint32_t newAddr = dst & ~(FLASH_PAGE_SIZE - 1);
 
-    hadWrite = true;
-
     if (newAddr != flashAddr) {
         flushFlash();
         flashAddr = newAddr;
@@ -160,6 +157,11 @@ static void flash_write(uint32_t dst, const uint8_t *src, int len) {
     }
     memcpy(flashBuf + (dst & (FLASH_PAGE_SIZE - 1)), src, len);
 }
+#else
+// defined in main_f4.c
+void flash_write(uint32_t dst, const uint8_t *src, int len);
+static void flushFlash(void) {}
+#endif
 
 static void uf2_timer_start(int delay) {
     resetTime = ms + delay;
@@ -171,13 +173,15 @@ void ghostfat_1ms() {
 
     if (resetTime && ms >= resetTime) {
         flushFlash();
-        target_manifest_app();
+        jump_to_app();
         while (1);
     }
 
+#ifdef FLASH_PAGE_SIZE
     if (lastFlush && ms - lastFlush > 100) {
         flushFlash();
     }
+#endif
 }
 
 static void padded_memcpy(char *dst, const char *src, int len) {

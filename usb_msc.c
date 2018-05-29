@@ -27,8 +27,9 @@
 #include "../lib/usb/usb_private.h"
 
 #include "dmesg.h"
-// #define LOG DMESG
-#define LOG NOOP
+
+#define LOG DMESG
+//#define LOG NOOP
 
 /* Definitions of Mass Storage Class from:
  *
@@ -797,6 +798,8 @@ static int msc_control_request(usbd_device *usbd_dev,
 /** @brief Setup the endpoints to be bulk & register the callbacks. */
 static void msc_set_config(usbd_device *usbd_dev, uint16_t wValue)
 {
+	LOG("MSC config");
+
 	usbd_mass_storage *ms = &_mass_storage;
 
 	(void)wValue;
@@ -849,6 +852,8 @@ usbd_mass_storage *usb_msc_init(usbd_device *usbd_dev,
 				 int (*write_block)(uint32_t lba,
 						    const uint8_t *copy_from))
 {
+	LOG("MSC start");
+
 	_mass_storage.usbd_dev = usbd_dev;
 	_mass_storage.ep_in = ep_in;
 	_mass_storage.ep_in_size = ep_in_size;

@@ -78,4 +78,6 @@ void codal_vdmesg(const char *format, va_list ap);
 
 #define NOOP(...) do{}while(0)
 
+#define PANIC(msg) do { DMESG("PANIC! %s", msg); for(;;); } while (0)
+
 #endif

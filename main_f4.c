@@ -15,6 +15,7 @@
 # include <libopencm3/stm32/timer.h>
 
 #include "bl.h"
+#include <string.h>
 
 /* flash parameters that we should not really know */
 static struct {
@@ -502,6 +503,57 @@ flash_func_sector_size(unsigned sector)
 	return 0;
 }
 
+static uint8_t erasedSectors[BOARD_FLASH_SECTORS];
+
+static bool is_blank(uint32_t addr, uint32_t size) {
+		for (unsigned i = 0; i < size; i += sizeof(uint32_t)) {
+			if (*(uint32_t*)(addr + i) != 0xffffffff) {
+				return false;
+			}
+		}
+		return true;
+}
+
+void
+flash_write(uint32_t dst, const uint8_t *src, int len)
+{
+	// assume sector 0 (bootloader) is same size as sector 1
+	uint32_t addr = flash_func_sector_size(0) + (APP_LOAD_ADDRESS & 0xfff00000);
+	uint32_t sector = 0;
+	int erased = false;
+	uint32_t size = 0;
+
+	for (unsigned i = 0; i < BOARD_FLASH_SECTORS; i++) {
+		size = flash_func_sector_size(i);
+		if (addr + size > dst) {
+			sector = flash_sectors[i].sector_number;
+			erased = erasedSectors[i];
+			erasedSectors[i] = 1; // don't erase anymore - we will continue writing here!
+			break;
+		}
+		addr += size;
+	}
+
+	if (sector == 0) 
+		PANIC("invalid sector");
+
+
+    flash_unlock();
+
+	if (!erased && !is_blank(addr, size)) {
+		flash_erase_sector(sector, FLASH_CR_PROGRAM_X32);
+		if (!is_blank(addr, size))
+			PANIC("failed to erase");
+	}
+
+    for (int i = 0; i < len; i += 4) {
+		flash_program_word(dst + i, *(uint32_t*)(src + i));
+    }
+
+	if (memcmp((void*)dst, src, len) != 0)
+		PANIC("failed to write");
+}
+
 void
 flash_func_erase_sector(unsigned sector)
 {
@@ -574,7 +626,6 @@ int get_mcu_desc(int max, uint8_t *revstr)
 {
 	uint32_t idcode = (*(uint32_t *)DBGMCU_IDCODE);
 	int32_t mcuid = idcode & DEVID_MASK;
-	mcu_rev_e revid = (idcode & REVID_MASK) >> 16;
 
 	mcu_des_t des = mcu_descriptions[STM32_UNKNOWN];
 
@@ -582,12 +633,6 @@ int get_mcu_desc(int max, uint8_t *revstr)
 		if (mcuid == mcu_descriptions[i].mcuid) {
 			des = mcu_descriptions[i];
 			break;
-		}
-	}
-
-	for (int i = 0; i < arraySize(silicon_revs); i++) {
-		if (silicon_revs[i].revid == revid) {
-			des.rev = silicon_revs[i].rev;
 		}
 	}
 
@@ -607,23 +652,6 @@ int get_mcu_desc(int max, uint8_t *revstr)
 	}
 
 	return  strp - revstr;
-}
-
-
-int check_silicon(void)
-{
-#if defined(TARGET_HW_PX4_FMU_V2) || defined(TARGET_HW_PX4_FMU_V4)
-	uint32_t idcode = (*(uint32_t *)DBGMCU_IDCODE);
-	mcu_rev_e revid = (idcode & REVID_MASK) >> 16;
-
-	for (int i = FIRST_BAD_SILICON_OFFSET; i < arraySize(silicon_revs); i++) {
-		if (silicon_revs[i].revid == revid) {
-			return -1;
-		}
-	}
-
-#endif
-	return 0;
 }
 
 uint32_t
@@ -842,6 +870,7 @@ main(void)
 
 
 	while (1) {
+		DMESG("enter bootloader, tmo=%d", timeout);
 		/* run the bootloader, come back after an app is uploaded or we time out */
 		bootloader(timeout);
 

@@ -126,9 +126,12 @@ void jump_to_app() {
 }
 
 volatile unsigned timer[NTIMERS];
+void ghostfat_1ms();
 
 void sys_tick_handler(void) {
     unsigned i;
+
+	ghostfat_1ms();
 
     for (i = 0; i < NTIMERS; i++)
         if (timer[i] > 0) {
@@ -195,50 +198,6 @@ static uint32_t crc32(const uint8_t *src, unsigned len, unsigned state) {
     }
 
     return state;
-}
-#endif
-
-#if 0
-void eraseFlash() {
-    // clear the bootloader LED while erasing - it stops blinking at random
-    // and that's confusing
-    led_set(LED_ON);
-
-    // erase all sectors
-    flash_unlock();
-
-    for (int i = 0; flash_func_sector_size(i) != 0; i++) {
-        flash_func_erase_sector(i);
-    }
-
-    // enable the LED while verifying the erase
-    led_set(LED_OFF);
-
-    // verify the erase
-    for (address = 0; address < board_info.fw_size; address += 4)
-        if (flash_func_read_word(address) != 0xffffffff) {
-            goto cmd_fail;
-        }
-
-    // resume blinking
-    led_set(LED_BLINK);
-
-    for (int i = 0; i < arg; i++) {
-
-        // program the word
-        flash_func_write_word(address, flash_buffer.w[i]);
-
-        // do immediate read-back verify
-        if (flash_func_read_word(address) != flash_buffer.w[i]) {
-            goto cmd_fail;
-        }
-
-        address += 4;
-    }
-
-    flash_func_read_sn(index);
-    get_mcu_id();
-    get_mcu_desc(len, buffer);
 }
 #endif
 

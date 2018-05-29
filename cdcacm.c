@@ -62,7 +62,7 @@
 static const char *usb_strings[] = {
 	USBMFGSTRING, /* Maps to Index 1 Index */
 	USBDEVICESTRING,
-	"0",
+	"12345678901234",
 };
 #define NUM_USB_STRINGS (sizeof(usb_strings)/sizeof(usb_strings[0]))
 
@@ -132,7 +132,7 @@ static const struct usb_config_descriptor config = {
 	.bLength = USB_DT_CONFIGURATION_SIZE,
 	.bDescriptorType = USB_DT_CONFIGURATION,
 	.wTotalLength = 0,
-	.bNumInterfaces = 2,
+	.bNumInterfaces = 1,
 	.bConfigurationValue = 1,
 	.iConfiguration = 0,
 	.bmAttributes = 0x80,
