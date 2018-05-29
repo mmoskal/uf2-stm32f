@@ -1,4 +1,6 @@
-# Bootloaders for the Pixhawk board family
+# UF2 Bootloaders for STM32
+
+This implements USB mass storage flashing using [UF2 format](https://github.com/Microsoft/uf2)
 
 ## Build instructions
 
