@@ -53,6 +53,9 @@
 #include "bl.h"
 #include "usb.h"
 
+void screen_init();
+
+
 inline void cinit(void *config, uint8_t interface) {
     if (interface == USB) {
         return usb_cinit();
@@ -236,6 +239,10 @@ void bootloader(unsigned timeout) {
     /* make the LED blink while we are idle */
     led_set(LED_BLINK);
     led_off(LED_ACTIVITY);
+
+    if (!timeout) {
+        screen_init();
+    }
 
     while (true) {
         if (timeout && !timer[TIMER_BL_WAIT]) {

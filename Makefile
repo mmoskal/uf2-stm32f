@@ -31,7 +31,7 @@ export FLAGS		 = -std=gnu99 \
 			   -Wl,-g \
 			   -Werror
 
-export COMMON_SRCS	 = bl.c usb.c usb_msc.c ghostfat.c dmesg.c
+export COMMON_SRCS	 = bl.c usb.c usb_msc.c ghostfat.c dmesg.c screen.c
 
 #
 # Bootloaders to build
