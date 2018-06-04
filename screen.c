@@ -73,7 +73,8 @@
 #define ST7735_GMCTRN1 0xE1
 
 void panic() {
-    for(;;);
+    for (;;)
+        ;
 }
 
 uint32_t pinport(int pin) {
@@ -145,7 +146,7 @@ static uint8_t cmdBuf[20];
 
 static void transfer(uint8_t *buf, int len) {
     while (len--) {
-        spi_send(SPIx, *buf++);
+        spi_xfer(SPIx, *buf++);
     }
 }
 
@@ -190,8 +191,7 @@ static void sendCmdSeq(const uint8_t *buf) {
 
 static uint32_t palXOR;
 
-static void setAddrWindow(int x, int y, int w, int h)
-{
+static void setAddrWindow(int x, int y, int w, int h) {
     uint8_t cmd0[] = {ST7735_RASET, 0, (uint8_t)x, 0, (uint8_t)(x + w - 1)};
     uint8_t cmd1[] = {ST7735_CASET, 0, (uint8_t)y, 0, (uint8_t)(y + h - 1)};
     sendCmd(cmd1, sizeof(cmd1));
@@ -200,7 +200,8 @@ static void setAddrWindow(int x, int y, int w, int h)
 
 static void configure(uint8_t madctl, uint32_t frmctr1) {
     uint8_t cmd0[] = {ST7735_MADCTL, madctl};
-    uint8_t cmd1[] = {ST7735_FRMCTR1, (uint8_t)(frmctr1 >> 16), (uint8_t)(frmctr1 >> 8), (uint8_t)frmctr1};
+    uint8_t cmd1[] = {ST7735_FRMCTR1, (uint8_t)(frmctr1 >> 16), (uint8_t)(frmctr1 >> 8),
+                      (uint8_t)frmctr1};
     sendCmd(cmd0, sizeof(cmd0));
     sendCmd(cmd1, cmd1[3] == 0xff ? 3 : 4);
 }
@@ -213,10 +214,10 @@ void draw_stripes() {
     SET_CS(0);
 
     for (int i = 0; i < DISPLAY_WIDTH; ++i) {
-        uint16_t color = i * 2;
+        uint16_t color = i;
         for (int j = 0; j < DISPLAY_HEIGHT; ++j) {
-            spi_send(SPIx, color >> 8);
-            spi_send(SPIx, color & 0xff);
+            spi_xfer(SPIx, color >> 8);
+            spi_xfer(SPIx, color & 0xff);
         }
     }
 
@@ -238,13 +239,20 @@ void screen_init() {
     setup_pin(CFG(PIN_DISPLAY_RST), GPIO_MODE_OUTPUT);
     setup_pin(CFG(PIN_DISPLAY_CS), GPIO_MODE_OUTPUT);
 
-    spi_init_master(SPIx, SPI_CR1_BAUDRATE_FPCLK_DIV_8, 0, 0, 0, 0);
+    spi_reset(SPIx);
+    spi_disable(SPIx);
+    spi_init_master(SPIx, SPI_CR1_BAUDRATE_FPCLK_DIV_4, SPI_CR1_CPOL_CLK_TO_0_WHEN_IDLE,
+                    SPI_CR1_CPHA_CLK_TRANSITION_1, SPI_CR1_DFF_8BIT, SPI_CR1_MSBFIRST);
+    spi_enable_software_slave_management(SPIx);
+    SPI_CR1(SPIx) |= SPI_CR1_SSI;
+    spi_enable(SPIx);
 
     SET_CS(1);
     SET_DC(1);
 
-    delay(10); // TODO check if delay needed
-    sendCmdSeq(initCmds);
+    if (CFG(PIN_DISPLAY_BL) != -1) {
+        pin_set(CFG(PIN_DISPLAY_BL), 1);
+    }
 
     if (CFG(PIN_DISPLAY_RST) != -1) {
         pin_set(CFG(PIN_DISPLAY_RST), 0);
@@ -253,9 +261,7 @@ void screen_init() {
         delay(20);
     }
 
-    if (CFG(PIN_DISPLAY_BL) != -1) {
-        pin_set(CFG(PIN_DISPLAY_BL), 1);
-    }
+    sendCmdSeq(initCmds);
 
     uint32_t cfg0 = CFG(DISPLAY_CFG0);
     uint32_t cfg2 = CFG(DISPLAY_CFG2);

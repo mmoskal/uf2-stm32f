@@ -28,8 +28,8 @@
 
 #include "dmesg.h"
 
-#define LOG DMESG
-//#define LOG NOOP
+//#define LOG DMESG
+#define LOG NOOP
 
 /* Definitions of Mass Storage Class from:
  *

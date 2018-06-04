@@ -55,7 +55,6 @@
 
 void screen_init();
 
-
 inline void cinit(void *config, uint8_t interface) {
     if (interface == USB) {
         return usb_cinit();
@@ -137,7 +136,7 @@ static int ledToBlink = LED_BOOTLOADER;
 void sys_tick_handler(void) {
     unsigned i;
 
-	ghostfat_1ms();
+    ghostfat_1ms();
 
     for (i = 0; i < NTIMERS; i++)
         if (timer[i] > 0) {
@@ -149,8 +148,10 @@ void sys_tick_handler(void) {
             led_off(ledToBlink);
             timer[TIMER_LED] = blDl / 3;
             blDl += blDir;
-            if (blDl > 60) blDir = -1;
-            else if (blDl < 20) blDir = 1;
+            if (blDl > 60)
+                blDir = -1;
+            else if (blDl < 20)
+                blDir = 1;
         } else {
             led_on(ledToBlink);
             timer[TIMER_LED] = 1;
@@ -217,12 +218,14 @@ static uint32_t crc32(const uint8_t *src, unsigned len, unsigned state) {
 #endif
 
 void usb_enumerated() {
-    timer[TIMER_BL_WAIT] = 24*3600*1000;
+    timer[TIMER_BL_WAIT] = 24 * 3600 * 1000;
     if (ledToBlink == LED_BOOTLOADER) {
         led_off(ledToBlink);
         ledToBlink = LED_ACTIVITY;
     }
 }
+
+int screen_on;
 
 void bootloader(unsigned timeout) {
     /* (re)start the timer system */
@@ -240,15 +243,18 @@ void bootloader(unsigned timeout) {
     led_set(LED_BLINK);
     led_off(LED_ACTIVITY);
 
-    if (!timeout) {
-        screen_init();
-    }
-
     while (true) {
         if (timeout && !timer[TIMER_BL_WAIT]) {
             return;
         }
 
-		usb_callback();
+        if (!timeout || timer[TIMER_BL_WAIT] > 10000) {
+            if (!screen_on) {
+                screen_on = 1;
+                screen_init();
+            }
+        }
+
+        usb_callback();
     }
 }
