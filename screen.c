@@ -7,24 +7,12 @@
 #include "pins.h"
 #include "bl.h"
 
+#define DISPLAY_WIDTH 160
+#define DISPLAY_HEIGHT 128
+
 #define SPIx SPI2
 #define SPI_AF GPIO_AF5
 #define SPI_CLOCK RCC_SPI2
-
-#define PIN_DISPLAY_CS PB_12
-#define PIN_DISPLAY_SCK PB_13
-#define PIN_DISPLAY_MOSI PB_15
-#define PIN_DISPLAY_MISO PB_14
-#define PIN_DISPLAY_BL PA_4
-#define PIN_DISPLAY_DC PC_5
-#define PIN_DISPLAY_RST PC_4
-#define DISPLAY_WIDTH 160
-#define DISPLAY_HEIGHT 128
-#define DISPLAY_CFG0 0x00000080
-#define DISPLAY_CFG1 0x000603
-#define DISPLAY_CFG2 22
-
-#define CFG(x) (x)
 
 #define ST7735_NOP 0x00
 #define ST7735_SWRESET 0x01
@@ -99,7 +87,7 @@ void setup_pin(int pin, int mode) {
     uint32_t port = pinport(pin);
     uint32_t mask = pinmask(pin);
     gpio_mode_setup(port, mode, GPIO_PUPD_NONE, mask);
-    if (pin != PIN_DISPLAY_MISO)
+    if (pin != CFG(PIN_DISPLAY_MISO))
         gpio_set_output_options(port, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, mask);
     if (mode == GPIO_MODE_AF)
         gpio_set_af(port, SPI_AF, mask);

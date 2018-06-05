@@ -36,7 +36,8 @@
 /* Define memory regions. */
 MEMORY
 {
-	rom (rx)  : ORIGIN = 0x08000000, LENGTH = 16K
+	rom (rx)  : ORIGIN = 0x08000000, LENGTH = 16K - 64
+	settings (rx)  : ORIGIN = 0x8003fc0, LENGTH = 64
 	ram (rwx) : ORIGIN = 0x20000000, LENGTH = 64K
 }
 
@@ -79,6 +80,12 @@ SECTIONS
 		KEEP (*(SORT(.fini_array.*)))
 		__fini_array_end = .;
 	} >rom
+
+
+        . = ORIGIN(settings);
+        .settings : {
+                KEEP (*(.settings))
+        } >settings
 
         . = ORIGIN(ram);
 

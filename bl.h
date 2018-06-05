@@ -42,6 +42,7 @@
 
 #include "uf2.h"
 #include "dmesg.h"
+#include "settings.h"
 
 /*****************************************************************************
  * Generic bootloader functions.

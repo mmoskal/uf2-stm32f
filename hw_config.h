@@ -955,7 +955,7 @@
 # define BOARD_OMNIBUSF4SD
 # define INTERFACE_USB                  1
 # define INTERFACE_USART                0
-# define USBDEVICESTRING                "GHI BrainPad"
+# define USBDEVICESTRING                "BrainPad"
 # define USBPRODUCTID                   0x1042
 
 # define BOARD_TYPE                     1042

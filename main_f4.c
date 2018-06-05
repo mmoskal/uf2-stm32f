@@ -149,8 +149,8 @@ static void board_init(void);
 #define BOOT_RTC_REG                MMIO32(RTC_BASE + 0x50)
 
 /* standard clocking for all F4 boards */
-static const struct rcc_clock_scale clock_setup = {
-	.pllm = OSC_FREQ,
+static struct rcc_clock_scale clock_setup = {
+	.pllm = 0,
 	.plln = 336,
 #if defined(STM32F401)
 	.pllp = 4,
@@ -454,6 +454,7 @@ board_deinit(void)
 static inline void
 clock_init(void)
 {
+	clock_setup.pllm = BOOT_SETTINGS->hseValue / 1000000;
 	rcc_clock_setup_hse_3v3(&clock_setup);
 }
 
