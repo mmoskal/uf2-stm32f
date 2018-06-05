@@ -206,6 +206,135 @@ static void configure(uint8_t madctl, uint32_t frmctr1) {
     sendCmd(cmd1, cmd1[3] == 0xff ? 3 : 4);
 }
 
+#define COL0(r, g, b) ((((r) >> 3) << 11) | (((g) >> 2) << 5) | ((b) >> 3))
+#define COL(c) COL0((c >> 16) & 0xff, (c >> 8) & 0xff, c & 0xff)
+
+const uint16_t palette[] = {
+    COL(0x000000), // 0
+    COL(0xffffff), // 1
+    COL(0xff2121), // 2
+    COL(0xff93c4), // 3
+    COL(0xff8135), // 4
+    COL(0xfff609), // 5
+    COL(0x249ca3), // 6
+    COL(0x78dc52), // 7
+    COL(0x003fad), // 8
+    COL(0x87f2ff), // 9
+    COL(0x8e2ec4), // 10
+    COL(0xa4839f), // 11
+    COL(0x5c406c), // 12
+    COL(0xe5cdc4), // 13
+    COL(0x91463d), // 14
+    COL(0x000000), // 15
+};
+
+uint8_t fb[168 * 128];
+extern const uint8_t font8[];
+extern const uint8_t mkcdLogo[];
+extern const uint8_t fileLogo[];
+extern const uint8_t pendriveLogo[];
+extern const uint8_t arrowLogo[];
+
+static void printch(int x, int y, int col, const uint8_t *fnt) {
+    for (int i = 0; i < 8; ++i) {
+        uint8_t *p = fb + (x + i) * DISPLAY_HEIGHT + y;
+        uint8_t mask = 0x01;
+        for (int j = 0; j < 8; ++j) {
+            if (*fnt & mask)
+                *p = col;
+            p++;
+            mask <<= 1;
+        }
+        fnt++;
+    }
+}
+
+void printicon(int x, int y, int col, const uint8_t *icon) {
+    int w = *icon++;
+    int h = *icon++;
+    int sz = *icon++;
+
+    uint8_t mask = 0x80;
+    int runlen = 0;
+    int runbit = 0;
+    uint8_t lastb = 0x00;
+
+    for (int i = 0; i < w; ++i) {
+        uint8_t *p = fb + (x + i) * DISPLAY_HEIGHT + y;
+        for (int j = 0; j < h; ++j) {
+            int c = 0;
+            if (mask != 0x80) {
+                if (lastb & mask)
+                    c = 1;
+                mask <<= 1;
+            } else if (runlen) {
+                if (runbit)
+                    c = 1;
+                runlen--;
+            } else {
+                if (sz-- <= 0)
+                    PANIC("invalid encoding");
+                lastb = *icon++;
+                if (lastb & 0x80) {
+                    runlen = lastb & 63;
+                    runbit = lastb & 0x40;
+                } else {
+                    mask = 0x01;
+                }
+                --j;
+                continue; // restart
+            }
+            if (c)
+                *p = col;
+            p++;
+        }
+    }
+}
+
+void print(int x, int y, int col, const char *text) {
+    int x0 = x;
+    while (*text) {
+        char c = *text++;
+        if (c == '\r')
+            continue;
+        if (c == '\n') {
+            x = x0;
+            y += 9;
+            continue;
+        }
+        if (x + 8 > DISPLAY_WIDTH) {
+            x = x0;
+            y += 9;
+        }
+        if (c < ' ')
+            c = '?';
+        if (c >= 0x7f)
+            c = '?';
+        c -= ' ';
+        printch(x, y, col, &font8[c * 8]);
+        x += 8;
+    }
+}
+
+void draw_screen() {
+    cmdBuf[0] = ST7735_RAMWR;
+    sendCmd(cmdBuf, 1);
+
+    SET_DC(1);
+    SET_CS(0);
+
+    uint8_t *p = fb;
+    for (int i = 0; i < DISPLAY_WIDTH; ++i) {
+        for (int j = 0; j < DISPLAY_HEIGHT; ++j) {
+            uint16_t color = palette[*p++ & 0xf];
+            spi_xfer(SPIx, color >> 8);
+            spi_xfer(SPIx, color & 0xff);
+        }
+    }
+
+    SET_CS(1);
+}
+
 void draw_stripes() {
     cmdBuf[0] = ST7735_RAMWR;
     sendCmd(cmdBuf, 1);
@@ -276,5 +405,13 @@ void screen_init() {
     configure(madctl, frmctr1);
     setAddrWindow(offX, offY, CFG(DISPLAY_WIDTH), CFG(DISPLAY_HEIGHT));
 
-    draw_stripes();
+    memset(fb, 10, sizeof(fb));
+    print(10, 110, 5, "makecode.com");
+    printicon(DISPLAY_WIDTH - 40, 90, 1, mkcdLogo);
+    printicon(25, 5, 1, fileLogo);
+    printicon(70, 5, 7, arrowLogo);
+    printicon(115, 5, 1, pendriveLogo);
+    print(3, 42, 1, "arcade.uf2");
+    print(100, 42, 1, "ARCADE");
+    draw_screen();
 }
