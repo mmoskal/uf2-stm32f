@@ -101,13 +101,19 @@ static const struct TextFile info[] = {
     {.name = "INFO_UF2TXT", .content = infoUf2File},
     {.name = "INDEX   HTM", .content = indexFile},
     {.name = "CURRENT UF2"},
+    {.name = "CONFIG  BIN"},
 };
-#define NUM_INFO (int)(sizeof(info) / sizeof(info[0]))
+#define NUM_INFO (int)(sizeof(info) / sizeof(info[0]) - 1)
 
 #define UF2_SIZE (flashSize() * 2)
 #define UF2_SECTORS (UF2_SIZE / 512)
 #define UF2_FIRST_SECTOR (NUM_INFO + 1)
 #define UF2_LAST_SECTOR (uint32_t)(UF2_FIRST_SECTOR + UF2_SECTORS - 1)
+
+#define CFGBIN_FIRST_SECTOR (UF2_LAST_SECTOR + 1)
+#define CFGBIN_SIZE (16 * 1024)
+#define CFGBIN_SECTORS (CFGBIN_SIZE / 512)
+#define CFGBIN_LAST_SECTOR (CFGBIN_FIRST_SECTOR + CFGBIN_SECTORS - 1)
 
 #define RESERVED_SECTORS 1
 #define ROOT_DIR_SECTORS 4
@@ -163,7 +169,8 @@ static void flushFlash(void) {
         DBG("Write flush at %x", flashAddr);
 
         target_flash_unlock();
-        bool ok = target_flash_program_array((void *)flashAddr, (void*)flashBuf, FLASH_PAGE_SIZE / 2);
+        bool ok =
+            target_flash_program_array((void *)flashAddr, (void *)flashBuf, FLASH_PAGE_SIZE / 2);
         target_flash_lock();
         (void)ok;
     }
@@ -198,7 +205,8 @@ void ghostfat_1ms() {
     if (resetTime && ms >= resetTime) {
         flushFlash();
         scb_reset_system();
-        while (1);
+        while (1)
+            ;
     }
 
 #ifdef FLASH_PAGE_SIZE
@@ -242,6 +250,8 @@ int read_block(uint32_t block_no, uint8_t *data) {
             uint32_t v = sectionIdx * 256 + i;
             if (UF2_FIRST_SECTOR <= v && v <= UF2_LAST_SECTOR)
                 ((uint16_t *)(void *)data)[i] = v == UF2_LAST_SECTOR ? 0xffff : v + 1;
+            if (CFGBIN_FIRST_SECTOR <= v && v <= CFGBIN_LAST_SECTOR)
+                ((uint16_t *)(void *)data)[i] = v == CFGBIN_LAST_SECTOR ? 0xffff : v + 1;
         }
     } else if (block_no < START_CLUSTERS) {
         sectionIdx -= START_ROOTDIR;
@@ -249,11 +259,16 @@ int read_block(uint32_t block_no, uint8_t *data) {
             DirEntry *d = (void *)data;
             padded_memcpy(d->name, (const char *)BootBlock.VolumeLabel, 11);
             d->attrs = 0x28;
-            for (int i = 0; i < NUM_INFO; ++i) {
+            for (int i = 0; i < NUM_INFO + 1; ++i) {
                 d++;
                 const struct TextFile *inf = &info[i];
-                d->size = inf->content ? strlen(inf->content) : UF2_SIZE;
-                d->startCluster = i + 2;
+                if (i == NUM_INFO) {
+                    d->size = CFGBIN_SIZE;
+                    d->startCluster = CFGBIN_FIRST_SECTOR;
+                } else {
+                    d->size = inf->content ? strlen(inf->content) : UF2_SIZE;
+                    d->startCluster = i + 2;
+                }
                 padded_memcpy(d->name, inf->name, 11);
             }
         }
@@ -271,9 +286,14 @@ int read_block(uint32_t block_no, uint8_t *data) {
                 bl->magicEnd = UF2_MAGIC_END;
                 bl->blockNo = sectionIdx;
                 bl->numBlocks = flashSize() / 256;
-                bl->targetAddr =  0x08000000 + addr;
+                bl->targetAddr = 0x08000000 + addr;
                 bl->payloadSize = 256;
                 memcpy(bl->data, (void *)addr, bl->payloadSize);
+            } else {
+                sectionIdx -= UF2_SECTORS;
+                addr = sectionIdx * 512;
+                if (addr < CFGBIN_SIZE)
+                    memcpy(data, (void*)addr, 512);
             }
         }
     }
@@ -281,7 +301,8 @@ int read_block(uint32_t block_no, uint8_t *data) {
     return 0;
 }
 
-static void write_block_core(uint32_t block_no, const uint8_t *data, bool quiet, WriteState *state) {
+static void write_block_core(uint32_t block_no, const uint8_t *data, bool quiet,
+                             WriteState *state) {
     const UF2_Block *bl = (const void *)data;
 
     (void)block_no;
@@ -329,7 +350,7 @@ static void write_block_core(uint32_t block_no, const uint8_t *data, bool quiet,
                 }
             }
         }
-        //DBG("wr %d=%d (of %d)", state->numWritten, bl->blockNo, bl->numBlocks);
+        // DBG("wr %d=%d (of %d)", state->numWritten, bl->blockNo, bl->numBlocks);
     }
 
     if (!isSet && !quiet) {
@@ -337,11 +358,9 @@ static void write_block_core(uint32_t block_no, const uint8_t *data, bool quiet,
     }
 }
 
-
 WriteState wrState;
 
-int write_block(uint32_t lba, const uint8_t *copy_from)
-{
+int write_block(uint32_t lba, const uint8_t *copy_from) {
     write_block_core(lba, copy_from, false, &wrState);
     return 0;
 }
