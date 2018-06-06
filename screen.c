@@ -222,6 +222,7 @@ extern const uint8_t mkcdLogo[];
 extern const uint8_t fileLogo[];
 extern const uint8_t pendriveLogo[];
 extern const uint8_t arrowLogo[];
+extern const uint8_t ghiLogo[];
 
 static void printch(int x, int y, int col, const uint8_t *fnt) {
     for (int i = 0; i < 8; ++i) {
@@ -287,12 +288,12 @@ void print(int x, int y, int col, const char *text) {
             continue;
         if (c == '\n') {
             x = x0;
-            y += 9;
+            y += 10;
             continue;
         }
         if (x + 8 > DISPLAY_WIDTH) {
             x = x0;
-            y += 9;
+            y += 10;
         }
         if (c < ' ')
             c = '?';
@@ -339,6 +340,12 @@ void draw_stripes() {
     }
 
     SET_CS(1);
+}
+
+void drawBar(int y, int h, int c) {
+    for (int x = 0; x < DISPLAY_WIDTH; ++x) {
+        memset(fb + x * DISPLAY_HEIGHT + y, c, h);
+    }
 }
 
 void screen_init() {
@@ -394,12 +401,21 @@ void screen_init() {
     setAddrWindow(offX, offY, CFG(DISPLAY_WIDTH), CFG(DISPLAY_HEIGHT));
 
     memset(fb, 10, sizeof(fb));
-    print(10, 110, 5, "makecode.com");
+    drawBar(0, 14, 4);
+    print(4, 3, 1, "arcade.makecode.com");
+
+    #define DRAG 25
+    #define DRAGX 10
+    printicon(DRAGX + 20, DRAG + 5, 1, fileLogo);
+    printicon(DRAGX + 65, DRAG, 1, arrowLogo);
+    printicon(DRAGX + 110, DRAG, 1, pendriveLogo);
+    print(DRAGX - 2, DRAG + 37, 1, "arcade.uf2");
+    print(DRAGX + 95, DRAG + 37, 1, "ARCADE");
+
+    drawBar(128-45, 45, 3);
     printicon(DISPLAY_WIDTH - 40, 90, 1, mkcdLogo);
-    printicon(25, 5, 1, fileLogo);
-    printicon(70, 5, 7, arrowLogo);
-    printicon(115, 5, 1, pendriveLogo);
-    print(3, 42, 1, "arcade.uf2");
-    print(100, 42, 1, "ARCADE");
+    printicon(10, 90, 1, ghiLogo);
+    print(48, 99, 1, "BrainPad\n  v1.1");
+
     draw_screen();
 }
