@@ -14,12 +14,22 @@ const uint32_t configValues[] = {
     CFG_DISPLAY_CFG0,        0x00000080,
     CFG_DISPLAY_CFG1,        0x000603,
     CFG_DISPLAY_CFG2,        22,
+#ifdef TARGET_HW_GAMEPAD
+    CFG_PIN_BTN_UP,          PA_5,
+    CFG_PIN_BTN_LEFT,        PA_15,
+    CFG_PIN_BTN_DOWN,        PB_10,
+    CFG_PIN_BTN_RIGHT,       PC_13,
+    CFG_PIN_BTN_A,           PB_1,
+    CFG_PIN_BTN_B,           PB_0,
+    CFG_PIN_BTN_MENU,        PC_10,
+#else
     CFG_PIN_BTN_LEFT,        PB_10,
     CFG_PIN_BTN_UP,          PA_15,
     CFG_PIN_BTN_RIGHT,       PA_5,
     CFG_PIN_BTN_DOWN,        PC_13,
     CFG_PIN_BTN_A,           PB_7,
     CFG_PIN_BTN_B,           PB_6,
+#endif
     0, 0
 };
 // clang-format on

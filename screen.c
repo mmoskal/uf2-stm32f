@@ -415,7 +415,7 @@ void screen_init() {
     drawBar(128-45, 45, 3);
     printicon(DISPLAY_WIDTH - 40, 90, 1, mkcdLogo);
     printicon(10, 90, 1, ghiLogo);
-    print(48, 99, 1, "BrainPad\n  v1.1");
+    print(48, 99, 1, USBDEVICESTRING);
 
     draw_screen();
 }

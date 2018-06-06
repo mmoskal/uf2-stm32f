@@ -948,21 +948,26 @@
  * # define BOARD_FORCE_BL_PULL            GPIO_PUPD_PULLUP
 */
 
-#elif  defined(TARGET_HW_BRAINPAD)
+#elif  defined(TARGET_HW_BRAINPAD) || defined(TARGET_HW_GAMEPAD)
 
 # define APP_LOAD_ADDRESS               0x08008000
 # define BOOTLOADER_DELAY               1000
 # define BOARD_OMNIBUSF4SD
 # define INTERFACE_USB                  1
 # define INTERFACE_USART                0
+#ifdef TARGET_HW_BRAINPAD
 # define USBDEVICESTRING                "BrainPad"
+# define OSC_FREQ                       12
+#else
+# define USBDEVICESTRING                "GamePad"
+# define OSC_FREQ                       8
+#endif
 # define USBPRODUCTID                   0x1042
 
 # define BOARD_TYPE                     1042
 # define BOARD_FLASH_SECTORS            8
 # define BOARD_FLASH_SIZE               (512 * 1024)
 
-# define OSC_FREQ                       12
 
 # define BOARD_PIN_LED_ACTIVITY         GPIO8
 # define BOARD_PIN_LED_BOOTLOADER       GPIO9
