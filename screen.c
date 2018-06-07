@@ -413,9 +413,9 @@ void screen_init() {
     print(DRAGX + 95, DRAG + 37, 1, "ARCADE");
 
     drawBar(128-45, 45, 3);
-    printicon(DISPLAY_WIDTH - 40, 90, 1, mkcdLogo);
-    printicon(10, 90, 1, ghiLogo);
-    print(48, 99, 1, USBDEVICESTRING);
+    printicon(DISPLAY_WIDTH - 36, 90, 1, mkcdLogo);
+    printicon(5, 90, 1, ghiLogo);
+    print(40, 99, 1, USBDEVICESTRING);
 
     draw_screen();
 }
