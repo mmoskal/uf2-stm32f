@@ -6,7 +6,6 @@ const uint32_t configValues[] = {
     CFG_PIN_DISPLAY_SCK,     PB_13,
     CFG_PIN_DISPLAY_MOSI,    PB_15,
     CFG_PIN_DISPLAY_MISO,    PB_14,
-    CFG_PIN_DISPLAY_BL,      PA_4,
     CFG_PIN_DISPLAY_DC,      PC_5,
     CFG_PIN_DISPLAY_RST,     PC_4,
     CFG_DISPLAY_WIDTH,       160,
@@ -22,7 +21,9 @@ const uint32_t configValues[] = {
     CFG_PIN_BTN_A,           PB_1,
     CFG_PIN_BTN_B,           PB_0,
     CFG_PIN_BTN_MENU,        PC_10,
+    CFG_PIN_DISPLAY_BL,      PC_7,
 #else
+    CFG_PIN_DISPLAY_BL,      PA_4,
     CFG_PIN_BTN_LEFT,        PB_10,
     CFG_PIN_BTN_UP,          PA_15,
     CFG_PIN_BTN_RIGHT,       PA_5,
