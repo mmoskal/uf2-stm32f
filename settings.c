@@ -13,7 +13,7 @@ const uint32_t configValues[] = {
     CFG_DISPLAY_CFG0,        0x00000080,
     CFG_DISPLAY_CFG1,        0x000603,
     CFG_DISPLAY_CFG2,        22,
-#ifdef TARGET_HW_GAMEPAD
+#ifdef TARGET_HW_BRAINGAMES
     CFG_PIN_BTN_UP,          PA_5,
     CFG_PIN_BTN_LEFT,        PA_15,
     CFG_PIN_BTN_DOWN,        PB_10,

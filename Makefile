@@ -58,7 +58,7 @@ TARGETS	= \
 	cube_f7_bl \
 	brainpad_bl
 
-TARGETS	= brainpad_bl gamepad_bl
+TARGETS	= brainpad_bl braingames_bl
 
 all:	$(TARGETS) sizes
 
@@ -135,8 +135,8 @@ aerofcv1_bl: $(MAKEFILE_LIST) $(LIBOPENCM3)
 brainpad_bl:$(MAKEFILE_LIST) $(LIBOPENCM3)
 	${MAKE} ${MKFLAGS} -f  Makefile.f4 TARGET_HW=BRAINPAD LINKER_FILE=stm32f4.ld TARGET_FILE_NAME=$@ EXTRAFLAGS=-DSTM32F401
 
-gamepad_bl:$(MAKEFILE_LIST) $(LIBOPENCM3)
-	${MAKE} ${MKFLAGS} -f  Makefile.f4 TARGET_HW=GAMEPAD LINKER_FILE=stm32f4.ld TARGET_FILE_NAME=$@ EXTRAFLAGS=-DSTM32F401
+braingames_bl:$(MAKEFILE_LIST) $(LIBOPENCM3)
+	${MAKE} ${MKFLAGS} -f  Makefile.f4 TARGET_HW=BRAINGAMES LINKER_FILE=stm32f4.ld TARGET_FILE_NAME=$@ EXTRAFLAGS=-DSTM32F401
 
 
 #
