@@ -145,7 +145,7 @@ static void board_init(void);
 
 #define BOOT_RTC_SIGNATURE          0x71a21877
 #define APP_RTC_SIGNATURE           0x24a22d12
-#define POWER_DOWN_RTC_SIGNATURE    0xdeaddead // Written by app fw to not re-power on.
+#define POWER_DOWN_RTC_SIGNATURE    0x5019684f // Written by app fw to not re-power on.
 #define BOOT_RTC_REG                MMIO32(RTC_BASE + 0x50)
 
 /* standard clocking for all F4 boards */
