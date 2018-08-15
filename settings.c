@@ -13,7 +13,7 @@ const uint32_t configValues[] = {
     CFG_DISPLAY_CFG0,        0x00000080,
     CFG_DISPLAY_CFG1,        0x000603,
     CFG_DISPLAY_CFG2,        22,
-#ifdef TARGET_HW_BRAINGAMES
+#if defined(TARGET_HW_BRAINGAMES) || defined(TARGET_HW_BRAINGAMES_REVB)
     CFG_PIN_BTN_UP,          PA_5,
     CFG_PIN_BTN_LEFT,        PA_15,
     CFG_PIN_BTN_DOWN,        PB_10,
@@ -22,6 +22,23 @@ const uint32_t configValues[] = {
     CFG_PIN_BTN_B,           PB_0,
     CFG_PIN_BTN_MENU,        PC_10,
     CFG_PIN_DISPLAY_BL,      PC_7,
+
+#ifdef TARGET_HW_BRAINGAMES_REVB
+    CFG_PIN_JACK_SND,        PA_8,
+    CFG_PIN_JACK_BZEN,       PA_10,
+    CFG_PIN_JACK_HPEN,       PA_4,
+    CFG_PIN_JACK_SENSE,      PA_6,
+    CFG_PIN_JACK_TX,         PA_9,
+    CFG_PIN_JACK_PWREN,      PA_7,
+#else
+    CFG_PIN_JACK_SND,        PA_8,
+    CFG_PIN_JACK_BZEN,       PA_10,
+    CFG_PIN_JACK_HPEN,       PA_2,
+    CFG_PIN_JACK_SENSE,      PB_3,
+    CFG_PIN_JACK_TX,         PA_9,
+    CFG_PIN_JACK_PWREN,      PB_5,
+#endif
+
 #else
     CFG_PIN_DISPLAY_BL,      PA_4,
     CFG_PIN_BTN_LEFT,        PB_10,
@@ -42,7 +59,9 @@ uint32_t lookupCfg(uint32_t key, uint32_t defl) {
             return ptr[1];
         ptr += 2;
     }
-    if (defl == 0x42004200) while(1);
+    if (defl == 0x42004200)
+        while (1)
+            ;
     return defl;
 }
 
