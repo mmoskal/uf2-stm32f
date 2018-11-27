@@ -7,6 +7,11 @@
 #include "pins.h"
 #include "bl.h"
 
+#ifdef STM32F1
+#define GPIO_MODE_AF GPIO_CNF_OUTPUT_ALTFN_PUSHPULL
+#define GPIO_MODE_OUTPUT GPIO_CNF_OUTPUT_PUSHPULL
+#endif
+
 #define DISPLAY_WIDTH 160
 #define DISPLAY_HEIGHT 128
 
@@ -86,11 +91,18 @@ uint16_t pinmask(int pin) {
 void setup_pin(int pin, int mode) {
     uint32_t port = pinport(pin);
     uint32_t mask = pinmask(pin);
+#ifdef STM32F1
+    if (pin == CFG(PIN_DISPLAY_MISO))
+        gpio_set_mode(port, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT, mask);
+    else
+        gpio_set_mode(port, GPIO_MODE_OUTPUT_50_MHZ, mode, mask);
+#else
     gpio_mode_setup(port, mode, GPIO_PUPD_NONE, mask);
     if (pin != CFG(PIN_DISPLAY_MISO))
         gpio_set_output_options(port, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, mask);
     if (mode == GPIO_MODE_AF)
         gpio_set_af(port, SPI_AF, mask);
+#endif
 }
 
 void pin_set(int pin, int v) {
@@ -404,15 +416,15 @@ void screen_init() {
     drawBar(0, 14, 4);
     print(4, 3, 1, "arcade.makecode.com");
 
-    #define DRAG 25
-    #define DRAGX 10
+#define DRAG 25
+#define DRAGX 10
     printicon(DRAGX + 20, DRAG + 5, 1, fileLogo);
     printicon(DRAGX + 65, DRAG, 1, arrowLogo);
     printicon(DRAGX + 110, DRAG, 1, pendriveLogo);
     print(DRAGX - 2, DRAG + 37, 1, "arcade.uf2");
     print(DRAGX + 95, DRAG + 37, 1, "ARCADE");
 
-    drawBar(128-45, 45, 3);
+    drawBar(128 - 45, 45, 3);
     printicon(DISPLAY_WIDTH - 36, 90, 1, mkcdLogo);
     printicon(5, 90, 1, ghiLogo);
     print(40, 99, 1, USBDEVICESTRING);

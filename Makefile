@@ -58,7 +58,7 @@ TARGETS	= \
 	cube_f7_bl \
 	brainpad_bl
 
-TARGETS	= brainpad_bl braingames_bl braingames_revb_bl
+TARGETS	= brainpad_bl braingames_bl braingames_revb_bl f103re
 
 all:	$(TARGETS) sizes
 
@@ -141,6 +141,8 @@ braingames_bl:$(MAKEFILE_LIST) $(LIBOPENCM3)
 braingames_revb_bl:$(MAKEFILE_LIST) $(LIBOPENCM3)
 	${MAKE} ${MKFLAGS} -f  Makefile.f4 TARGET_HW=BRAINGAMES_REVB LINKER_FILE=stm32f4.ld TARGET_FILE_NAME=$@ EXTRAFLAGS=-DSTM32F401
 
+f103re: $(MAKEFILE_LIST) $(LIBOPENCM3)
+	${MAKE} ${MKFLAGS} -f  Makefile.f1 TARGET_HW=F103RE LINKER_FILE=stm32f1.ld TARGET_FILE_NAME=$@
 
 #
 # Show sizes

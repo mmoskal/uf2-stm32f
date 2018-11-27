@@ -952,7 +952,6 @@
 
 # define APP_LOAD_ADDRESS               0x08008000
 # define BOOTLOADER_DELAY               1000
-# define BOARD_OMNIBUSF4SD
 # define INTERFACE_USB                  1
 # define INTERFACE_USART                0
 #ifdef TARGET_HW_BRAINPAD
@@ -985,6 +984,34 @@
 //# define BOARD_PORT_VBUS                GPIOC
 
 # define USBMFGSTRING                   "GHI Electronics"
+
+#elif  defined(TARGET_HW_F103RE)
+
+# define APP_LOAD_ADDRESS               0x08008000
+# define BOOTLOADER_DELAY               1000
+# define INTERFACE_USB                  1
+# define INTERFACE_USART                0
+# define USBDEVICESTRING                "F103RE"
+# define OSC_FREQ                       8
+# define USBPRODUCTID                   0x1042
+
+# define BOARD_TYPE                     1042
+# define BOARD_FLASH_SECTORS            8
+# define BOARD_FLASH_SIZE               (512 * 1024)
+
+
+# define BOARD_PIN_LED_ACTIVITY         GPIO11
+# define BOARD_PIN_LED_BOOTLOADER       0
+# define BOARD_PORT_LEDS                GPIOB
+# define BOARD_CLOCK_LEDS               RCC_AHB1ENR_IOPBEN
+# define BOARD_LED_ON                   gpio_clear
+# define BOARD_LED_OFF                  gpio_set
+
+# define BOARD_USB_VBUS_SENSE_DISABLED
+//# define BOARD_PIN_VBUS                 GPIO5
+//# define BOARD_PORT_VBUS                GPIOC
+
+# define USBMFGSTRING                   "No Name"
 
 #else
 # error Undefined Target Hardware

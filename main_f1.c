@@ -65,20 +65,6 @@ board_init(void)
 	/* enable the backup registers */
 	rcc_peripheral_enable_clock(&RCC_APB1ENR, RCC_APB1ENR_PWREN | RCC_APB1ENR_BKPEN);
 
-#ifdef INTERFACE_USART
-	/* configure usart pins */
-	rcc_peripheral_enable_clock(&BOARD_USART_PIN_CLOCK_REGISTER, BOARD_USART_PIN_CLOCK_BIT);
-	gpio_set_mode(BOARD_PORT_USART,
-		      GPIO_MODE_OUTPUT_50_MHZ,
-		      GPIO_CNF_OUTPUT_ALTFN_PUSHPULL,
-		      BOARD_PIN_TX);
-
-	/* configure USART clock */
-	rcc_peripheral_enable_clock(&BOARD_USART_CLOCK_REGISTER, BOARD_USART_CLOCK_BIT);
-#endif
-#ifdef INTERFACE_I2C
-# error I2C GPIO config not handled yet
-#endif
 }
 
 void
