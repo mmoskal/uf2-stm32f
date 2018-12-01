@@ -293,7 +293,7 @@ int read_block(uint32_t block_no, uint8_t *data) {
                 sectionIdx -= UF2_SECTORS;
                 addr = sectionIdx * 512;
                 if (addr < CFGBIN_SIZE)
-                    memcpy(data, (void*)addr, 512);
+                    memcpy(data, (void *)addr, 512);
             }
         }
     }
@@ -309,13 +309,12 @@ static void write_block_core(uint32_t block_no, const uint8_t *data, bool quiet,
 
     // DBG("Write magic: %x", bl->magicStart0);
 
-    if (!is_uf2_block(bl)) {
+    if (!is_uf2_block(bl) || !UF2_IS_MY_FAMILY(bl)) {
         return;
     }
 
     if ((bl->flags & UF2_FLAG_NOFLASH) || bl->payloadSize > 256 || (bl->targetAddr & 0xff) ||
-        bl->targetAddr < USER_FLASH_START || bl->targetAddr + bl->payloadSize > USER_FLASH_END ||
-        !UF2_IS_MY_FAMILY(bl)) {
+        bl->targetAddr < USER_FLASH_START || bl->targetAddr + bl->payloadSize > USER_FLASH_END) {
         DBG("Skip block at %x", bl->targetAddr);
         // this happens when we're trying to re-flash CURRENT.UF2 file previously
         // copied from a device; we still want to count these blocks to reset properly
