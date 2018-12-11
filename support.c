@@ -1,3 +1,5 @@
+// This saves over 1kb
+
 #include <string.h>
 #include <stdint.h>
 

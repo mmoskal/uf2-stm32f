@@ -31,7 +31,7 @@ export FLAGS		 = -std=gnu99 \
 			   -Wl,-g \
 			   -Werror
 
-export COMMON_SRCS	 = bl.c usb.c usb_msc.c ghostfat.c dmesg.c screen.c images.c settings.c hf2.c
+export COMMON_SRCS	 = bl.c usb.c usb_msc.c ghostfat.c dmesg.c screen.c images.c settings.c hf2.c support.c
 
 #
 # Bootloaders to build
@@ -58,7 +58,8 @@ TARGETS	= \
 	cube_f7_bl \
 	brainpad_bl
 
-TARGETS	= brainpad_bl braingames_bl braingames_revb_bl
+#TARGETS	= brainpad_bl braingames_bl braingames_revb_bl
+TARGETS	= braingames_revb_bl
 
 all:	$(TARGETS) sizes
 
@@ -138,7 +139,8 @@ brainpad_bl:$(MAKEFILE_LIST) $(LIBOPENCM3)
 braingames_bl:$(MAKEFILE_LIST) $(LIBOPENCM3)
 	${MAKE} ${MKFLAGS} -f  Makefile.f4 TARGET_HW=BRAINGAMES LINKER_FILE=stm32f4.ld TARGET_FILE_NAME=$@ EXTRAFLAGS=-DSTM32F401
 
-braingames_revb_bl:$(MAKEFILE_LIST) $(LIBOPENCM3)
+#braingames_revb_bl:$(MAKEFILE_LIST) $(LIBOPENCM3)
+braingames_revb_bl:$(MAKEFILE_LIST)
 	${MAKE} ${MKFLAGS} -f  Makefile.f4 TARGET_HW=BRAINGAMES_REVB LINKER_FILE=stm32f4.ld TARGET_FILE_NAME=$@ EXTRAFLAGS=-DSTM32F401
 
 

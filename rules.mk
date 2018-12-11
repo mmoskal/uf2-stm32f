@@ -22,7 +22,7 @@ $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
 
 $(ELF):		$(OBJS) $(MAKEFILE_LIST)
-	$(CC) -o $@ $(OBJS) $(FLAGS)
+	$(CC) -o $@ $(OBJS) $(FLAGS)  -Wl,-Map=$(ELF).map
 
 $(BINARY):	$(ELF)
 	$(OBJCOPY) -O binary $(ELF) $(BINARY)
