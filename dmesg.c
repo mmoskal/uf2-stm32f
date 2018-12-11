@@ -98,6 +98,10 @@ static void writeNum(char *buf, uint32_t n, bool full)
     buf[i] = 0;
 }
 
+void writeHex(char *buf, uint32_t n) {
+    writeNum(buf, n, true);
+}
+
 static void logwritenum(uint32_t n, bool full, bool hex)
 {
     char buff[20];

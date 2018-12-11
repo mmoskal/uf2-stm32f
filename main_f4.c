@@ -114,6 +114,17 @@ mcu_des_t mcu_descriptions[] = {
 	{ STM32F42x_446xx, 	"STM32F446XX",	'?'},
 };
 
+char serial_number[32];
+#define STM32_UUID ((uint32_t *)0x1FFF7A10)
+
+static void initSerialNumber()
+{
+	writeHex(serial_number, STM32_UUID[0]);
+	writeHex(serial_number+8, STM32_UUID[1]);
+	writeHex(serial_number+16, STM32_UUID[2]);
+}
+
+
 typedef struct mcu_rev_t {
 	mcu_rev_e revid;
 	char  rev;
@@ -400,6 +411,8 @@ board_init(void)
 
 	/* enable the power controller clock */
 	rcc_peripheral_enable_clock(&RCC_APB1ENR, RCC_APB1ENR_PWREN);
+
+	initSerialNumber();
 }
 
 void

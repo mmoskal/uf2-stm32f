@@ -81,4 +81,7 @@ void codal_vdmesg(const char *format, va_list ap);
 #define PANIC(msg) do { DMESG("PANIC! %s", msg); for(;;); } while (0)
 
 #define assert(cond) if(!(cond)) PANIC("Assertion failed!")
+
+void writeHex(char *buf, uint32_t n);
+
 #endif
