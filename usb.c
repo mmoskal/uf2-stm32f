@@ -93,14 +93,14 @@ static const struct usb_device_descriptor dev = {
 static const struct usb_endpoint_descriptor msc_endp[] = {{
 	.bLength = USB_DT_ENDPOINT_SIZE,
 	.bDescriptorType = USB_DT_ENDPOINT,
-	.bEndpointAddress = 0x01,
+	.bEndpointAddress = MSC_EP_OUT,
 	.bmAttributes = USB_ENDPOINT_ATTR_BULK,
 	.wMaxPacketSize = 64,
 	.bInterval = 0,
 }, {
 	.bLength = USB_DT_ENDPOINT_SIZE,
 	.bDescriptorType = USB_DT_ENDPOINT,
-	.bEndpointAddress = 0x82,
+	.bEndpointAddress = MSC_EP_IN,
 	.bmAttributes = USB_ENDPOINT_ATTR_BULK,
 	.wMaxPacketSize = 64,
 	.bInterval = 0,
@@ -238,11 +238,11 @@ usb_cinit(void)
 			     usbd_control_buffer, sizeof(usbd_control_buffer));
 #endif
 
-	usb_msc_init(usbd_dev, 0x82, 64, 0x01, 64, "Example Ltd", "UF2 Bootloader",
+	usb_msc_init(usbd_dev, MSC_EP_IN, 64, MSC_EP_OUT, 64, "Example Ltd", "UF2 Bootloader",
 		    "42.00", UF2_NUM_BLOCKS, read_block, write_block);
 
 	hf2_init(usbd_dev);
-	
+
 #if defined(STM32F4)
 
 	if (OTG_FS_CID == OTG_CID_HAS_VBDEN) {

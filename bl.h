@@ -131,8 +131,12 @@ extern void cout(uint8_t *buf, unsigned len);
 #define INTF_MSC                0
 #define INTF_HF2                1
 
-#define HF2_EP_IN 0x83
-#define HF2_EP_OUT 0x03
+
+#define MSC_EP_IN 0x81
+#define MSC_EP_OUT 0x01
+
+#define HF2_EP_IN 0x82
+#define HF2_EP_OUT 0x02
 
 void resetIntoApp();
 void resetIntoBootloader();
