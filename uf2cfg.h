@@ -1,4 +1,4 @@
-#define UF2_VERSION "1.00"
+#define UF2_VERSION "1.1.0"
 #define BOARD_ID "STM32F401-generic-v0"
 #define INDEX_URL "https://pxt.io"
 #define UF2_NUM_BLOCKS 8000

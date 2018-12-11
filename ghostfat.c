@@ -83,7 +83,7 @@ struct TextFile {
 #define STR0(x) #x
 #define STR(x) STR0(x)
 const char infoUf2File[] = //
-    "UF2 Bootloader " UF2_VERSION "\r\n"
+    "UF2 Bootloader v" UF2_VERSION " W\r\n"
     "Model: " USBMFGSTRING " " USBDEVICESTRING "\r\n"
     "Board-ID: " BOARD_ID "\r\n";
 
