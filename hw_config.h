@@ -961,7 +961,7 @@
 # define OSC_FREQ                       12
 #else
 #ifdef TARGET_HW_BRAINGAMES_REVB
-# define USBDEVICESTRING                "BrainGames RevB"
+# define USBDEVICESTRING                "BrainPad Arcade"
 #else
 # define USBDEVICESTRING                "BrainGames RevA"
 #endif
