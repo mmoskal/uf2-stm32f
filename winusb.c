@@ -19,7 +19,7 @@
 #include <libopencm3/usb/usbd.h>
 #include "winusb.h"
 
-#include "usb_conf.h"
+//#include "usb_conf.h"
 
 static const struct winusb_compatible_id_descriptor winusb_wcid = {
     .dwLength = (WINUSB_COMPATIBLE_ID_HEADER_SIZE +
@@ -78,7 +78,7 @@ static void winusb_set_config(usbd_device* usbd_dev, uint16_t wValue) {
 }
 
 void winusb_setup(usbd_device* usbd_dev) {
-    usbd_register_extra_string(usbd_dev, 0xEE, "MSFT100!");
+    //usbd_register_extra_string(usbd_dev, 0xEE, "MSFT100!");
     usbd_register_set_config_callback(usbd_dev, winusb_set_config);
 
     /* Windows probes the compatible ID before setting the configuration,

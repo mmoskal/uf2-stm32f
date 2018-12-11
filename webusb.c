@@ -19,8 +19,8 @@
 #include <libopencm3/usb/usbd.h>
 #include "webusb.h"
 
-#include "usb_conf.h"
-#include "config.h"
+// #include "usb_conf.h"
+// #include "config.h"
 
 const struct webusb_platform_descriptor webusb_platform = {
     .bLength = WEBUSB_PLATFORM_DESCRIPTOR_SIZE,

@@ -45,6 +45,9 @@
 
 #include "bl.h"
 
+#include "webusb.h"
+#include "winusb.h"
+
 /*
  * ST changed the meaning and sense of a few critical bits
  * in the USB IP block identified as 0x00002000
@@ -55,6 +58,7 @@
 #define OTG_CID_HAS_VBDEN 0x00002000
 #define OTG_GCCFG_VBDEN   (1 << 21)
 
+extern char serial_number[];
 /* Provide the stings for the Index 1-n as a requested index of 0 is used for the supported langages
  *  and is hard coded in the usb lib. The array below is indexed by requested index-1, therefore
  *  element[0] maps to requested index 1
@@ -62,7 +66,7 @@
 static const char *usb_strings[] = {
 	USBMFGSTRING, /* Maps to Index 1 Index */
 	USBDEVICESTRING,
-	"12345678901234",
+	serial_number,
 };
 #define NUM_USB_STRINGS (sizeof(usb_strings)/sizeof(usb_strings[0]))
 
@@ -74,8 +78,7 @@ static uint8_t usbd_control_buffer[128];
 static const struct usb_device_descriptor dev = {
 	.bLength = USB_DT_DEVICE_SIZE,
 	.bDescriptorType = USB_DT_DEVICE,	/**< Specifies he descriptor type */
-	.bcdUSB = 0x0200,					/**< The USB interface version, binary coded (2.0) */
-	//WEBUSB 0x0210
+	.bcdUSB = 0x0210,					/**< The USB interface version, binary coded (2.10) */
 	.bDeviceClass = 0,		/**< USB device class, CDC in this case */
 	.bDeviceSubClass = 0,
 	.bDeviceProtocol = 0,
@@ -163,6 +166,19 @@ static const struct usb_interface ifaces[] = {
     },    
 };
 
+// WEBUSB It seems the MS capability thingy is missing here
+static const struct usb_device_capability_descriptor* capabilities[] = {
+    (const struct usb_device_capability_descriptor*)&webusb_platform,
+};
+
+static const struct usb_bos_descriptor bos = {
+    .bLength = USB_DT_BOS_SIZE,
+    .bDescriptorType = USB_DT_BOS,
+    .wTotalLength = USB_DT_BOS_SIZE + sizeof(webusb_platform),
+    .bNumDeviceCaps = sizeof(capabilities)/sizeof(capabilities[0]),
+    .capabilities = capabilities
+};
+
 static const struct usb_config_descriptor config = {
 	.bLength = USB_DT_CONFIGURATION_SIZE,
 	.bDescriptorType = USB_DT_CONFIGURATION,
@@ -226,7 +242,7 @@ usb_cinit(void)
 	OTG_FS_GCCFG |= OTG_GCCFG_NOVBUSSENS;
 #endif
 
-	usbd_dev = usbd_init(&otgfs_usb_driver, &dev, &config, usb_strings, NUM_USB_STRINGS,
+	usbd_dev = usbd_init(&otgfs_usb_driver, &dev, &config, &bos, usb_strings, NUM_USB_STRINGS,
 			     usbd_control_buffer, sizeof(usbd_control_buffer));
 
 #elif defined(STM32F1)
@@ -242,6 +258,8 @@ usb_cinit(void)
 		    "42.00", UF2_NUM_BLOCKS, read_block, write_block);
 
 	hf2_init(usbd_dev);
+
+	winusb_setup(usbd_dev);
 
 #if defined(STM32F4)
 
