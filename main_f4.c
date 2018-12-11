@@ -115,7 +115,7 @@ mcu_des_t mcu_descriptions[] = {
 };
 
 char serial_number[32];
-#define STM32_UUID ((uint32_t *)0x1FFF7A10)
+#define STM32_UUID ((uint32_t *)UDID_START)
 
 static void initSerialNumber()
 {
@@ -133,9 +133,6 @@ typedef struct mcu_rev_t {
 #define APP_SIZE_MAX			(BOARD_FLASH_SIZE - (BOOTLOADER_RESERVATION_SIZE + APP_RESERVATION_SIZE))
 
 /* context passed to cinit */
-#if INTERFACE_USART
-# define BOARD_INTERFACE_CONFIG_USART	(void *)BOARD_USART
-#endif
 #if INTERFACE_USB
 # define BOARD_INTERFACE_CONFIG_USB  	NULL
 #endif
@@ -344,53 +341,9 @@ board_init(void)
 {
 	/* fix up the max firmware size, we have to read memory to get this */
 	board_info.fw_size = APP_SIZE_MAX;
-#if defined(TARGET_HW_PX4_FMU_V2) || defined(TARGET_HW_PX4_FMU_V4)
-
-	if (check_silicon() && board_info.fw_size == (2 * 1024 * 1024) - BOOTLOADER_RESERVATION_SIZE) {
-		board_info.fw_size = (1024 * 1024) - BOOTLOADER_RESERVATION_SIZE;
-	}
-
-#endif
-
-#if defined(BOARD_POWER_PIN_OUT)
-	/* Configure the Power pins */
-	rcc_peripheral_enable_clock(&BOARD_POWER_CLOCK_REGISTER, BOARD_POWER_CLOCK_BIT);
-	gpio_mode_setup(BOARD_POWER_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, BOARD_POWER_PIN_OUT);
-	gpio_set_output_options(BOARD_POWER_PORT, GPIO_OTYPE_PP, GPIO_OSPEED_2MHZ, BOARD_POWER_PIN_OUT);
-	BOARD_POWER_ON(BOARD_POWER_PORT, BOARD_POWER_PIN_OUT);
-#endif
 
 #if INTERFACE_USB
-
 	rcc_peripheral_enable_clock(&RCC_AHB1ENR, BOARD_CLOCK_VBUS);
-#endif
-
-#if INTERFACE_USART
-	/* configure USART pins */
-	rcc_peripheral_enable_clock(&BOARD_USART_PIN_CLOCK_REGISTER, BOARD_USART_PIN_CLOCK_BIT);
-
-	/* Setup GPIO pins for USART transmit. */
-	gpio_mode_setup(BOARD_PORT_USART, GPIO_MODE_AF, GPIO_PUPD_PULLUP, BOARD_PIN_TX | BOARD_PIN_RX);
-	/* Setup USART TX & RX pins as alternate function. */
-	gpio_set_af(BOARD_PORT_USART, BOARD_PORT_USART_AF, BOARD_PIN_TX);
-	gpio_set_af(BOARD_PORT_USART, BOARD_PORT_USART_AF, BOARD_PIN_RX);
-
-	/* configure USART clock */
-	rcc_peripheral_enable_clock(&BOARD_USART_CLOCK_REGISTER, BOARD_USART_CLOCK_BIT);
-#endif
-
-#if defined(BOARD_FORCE_BL_PIN_IN) && defined(BOARD_FORCE_BL_PIN_OUT)
-	/* configure the force BL pins */
-	rcc_peripheral_enable_clock(&BOARD_FORCE_BL_CLOCK_REGISTER, BOARD_FORCE_BL_CLOCK_BIT);
-	gpio_mode_setup(BOARD_FORCE_BL_PORT, GPIO_MODE_INPUT, BOARD_FORCE_BL_PULL, BOARD_FORCE_BL_PIN_IN);
-	gpio_mode_setup(BOARD_FORCE_BL_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, BOARD_FORCE_BL_PIN_OUT);
-	gpio_set_output_options(BOARD_FORCE_BL_PORT, GPIO_OTYPE_PP, GPIO_OSPEED_100MHZ, BOARD_FORCE_BL_PIN_OUT);
-#endif
-
-#if defined(BOARD_FORCE_BL_PIN)
-	/* configure the force BL pins */
-	rcc_peripheral_enable_clock(&BOARD_FORCE_BL_CLOCK_REGISTER, BOARD_FORCE_BL_CLOCK_BIT);
-	gpio_mode_setup(BOARD_FORCE_BL_PORT, GPIO_MODE_INPUT, BOARD_FORCE_BL_PULL, BOARD_FORCE_BL_PIN);
 #endif
 
 	/* initialise LEDs */
@@ -418,34 +371,6 @@ board_init(void)
 void
 board_deinit(void)
 {
-
-#if INTERFACE_USART
-	/* deinitialise GPIO pins for USART transmit. */
-	gpio_mode_setup(BOARD_PORT_USART, GPIO_MODE_INPUT, GPIO_PUPD_NONE, BOARD_PIN_TX | BOARD_PIN_RX);
-
-	/* disable USART peripheral clock */
-	rcc_peripheral_disable_clock(&BOARD_USART_CLOCK_REGISTER, BOARD_USART_CLOCK_BIT);
-#endif
-
-#if defined(BOARD_FORCE_BL_PIN_IN) && defined(BOARD_FORCE_BL_PIN_OUT)
-	/* deinitialise the force BL pins */
-	gpio_mode_setup(BOARD_FORCE_BL_PORT, GPIO_MODE_INPUT, GPIO_PUPD_NONE, BOARD_FORCE_BL_PIN_OUT);
-	gpio_mode_setup(BOARD_FORCE_BL_PORT, GPIO_MODE_INPUT, GPIO_PUPD_NONE, BOARD_FORCE_BL_PIN_IN);
-#endif
-
-#if defined(BOARD_FORCE_BL_PIN)
-	/* deinitialise the force BL pin */
-	gpio_mode_setup(BOARD_FORCE_BL_PORT, GPIO_MODE_INPUT, GPIO_PUPD_NONE, BOARD_FORCE_BL_PIN);
-#endif
-
-#if defined(BOARD_POWER_PIN_OUT) && defined(BOARD_POWER_PIN_RELEASE)
-	/* deinitialize the POWER pin - with the assumption the hold up time of
-	 * the voltage being bleed off by an inupt pin impedance will allow
-	 * enough time to boot the app
-	 */
-	gpio_mode_setup(BOARD_POWER_PORT, GPIO_MODE_INPUT, GPIO_PUPD_NONE, BOARD_POWER_PIN);
-#endif
-
 	/* deinitialise LEDs */
 	gpio_mode_setup(
 		BOARD_PORT_LEDS,
@@ -634,43 +559,6 @@ flash_func_read_otp(uint32_t address)
 	return *(uint32_t *)(address + OTP_BASE);
 }
 
-uint32_t get_mcu_id(void)
-{
-	return *(uint32_t *)DBGMCU_IDCODE;
-}
-
-int get_mcu_desc(int max, uint8_t *revstr)
-{
-	uint32_t idcode = (*(uint32_t *)DBGMCU_IDCODE);
-	int32_t mcuid = idcode & DEVID_MASK;
-
-	mcu_des_t des = mcu_descriptions[STM32_UNKNOWN];
-
-	for (int i = 0; i < arraySize(mcu_descriptions); i++) {
-		if (mcuid == mcu_descriptions[i].mcuid) {
-			des = mcu_descriptions[i];
-			break;
-		}
-	}
-
-	uint8_t *endp = &revstr[max - 1];
-	uint8_t *strp = revstr;
-
-	while (strp < endp && *des.desc) {
-		*strp++ = *des.desc++;
-	}
-
-	if (strp < endp) {
-		*strp++ = ',';
-	}
-
-	if (strp < endp) {
-		*strp++ = des.rev;
-	}
-
-	return  strp - revstr;
-}
-
 uint32_t
 flash_func_read_sn(uint32_t address)
 {
@@ -782,33 +670,6 @@ main(void)
 		board_set_rtc_signature(0);
 	}
 
-#ifdef BOOT_DELAY_ADDRESS
-	{
-		/*
-		  if a boot delay signature is present then delay the boot
-		  by at least that amount of time in seconds. This allows
-		  for an opportunity for a companion computer to load a
-		  new firmware, while still booting fast by sending a BOOT
-		  command
-		 */
-		uint32_t sig1 = flash_func_read_word(BOOT_DELAY_ADDRESS);
-		uint32_t sig2 = flash_func_read_word(BOOT_DELAY_ADDRESS + 4);
-
-		if (sig2 == BOOT_DELAY_SIGNATURE2 &&
-		    (sig1 & 0xFFFFFF00) == (BOOT_DELAY_SIGNATURE1 & 0xFFFFFF00)) {
-			unsigned boot_delay = sig1 & 0xFF;
-
-			if (boot_delay <= BOOT_DELAY_MAX) {
-				try_boot = false;
-
-				if (timeout < boot_delay * 1000) {
-					timeout = boot_delay * 1000;
-				}
-			}
-		}
-	}
-#endif
-
 	/*
 	 * Check if the force-bootloader pins are strapped; if strapped,
 	 * don't try booting.
@@ -849,15 +710,6 @@ main(void)
 	/* start the interface */
 	cinit(BOARD_INTERFACE_CONFIG_USB, USB);
 
-
-#if 0
-	// MCO1/02
-	gpio_mode_setup(GPIOA, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO8);
-	gpio_set_output_options(GPIOA, GPIO_OTYPE_PP, GPIO_OSPEED_100MHZ, GPIO8);
-	gpio_set_af(GPIOA, GPIO_AF0, GPIO8);
-	gpio_mode_setup(GPIOC, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO9);
-	gpio_set_af(GPIOC, GPIO_AF0, GPIO9);
-#endif
 
 
 	while (1) {

@@ -115,10 +115,6 @@ extern uint32_t flash_func_read_word(uint32_t address);
 extern uint32_t flash_func_read_otp(uint32_t address);
 extern uint32_t flash_func_read_sn(uint32_t address);
 
-extern uint32_t get_mcu_id(void);
-int get_mcu_desc(int max, uint8_t *revstr);
-extern int check_silicon(void);
-
 /*****************************************************************************
  * Interface in/output.
  */
