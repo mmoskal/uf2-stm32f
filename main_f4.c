@@ -342,28 +342,13 @@ board_init(void)
 	/* fix up the max firmware size, we have to read memory to get this */
 	board_info.fw_size = APP_SIZE_MAX;
 
-#if INTERFACE_USB
-	rcc_peripheral_enable_clock(&RCC_AHB1ENR, BOARD_CLOCK_VBUS);
-#endif
+	RCC_APB1ENR |= RCC_APB1ENR_PWREN;
+	
+	// enable all GPIO clocks
+	RCC_AHB1ENR |= RCC_AHB1ENR_IOPAEN|RCC_AHB1ENR_IOPBEN|RCC_AHB1ENR_IOPCEN|BOARD_CLOCK_VBUS;
 
-	/* initialise LEDs */
-	rcc_peripheral_enable_clock(&RCC_AHB1ENR, BOARD_CLOCK_LEDS);
-	gpio_mode_setup(
-		BOARD_PORT_LEDS,
-		GPIO_MODE_OUTPUT,
-		GPIO_PUPD_NONE,
-		BOARD_PIN_LED_BOOTLOADER | BOARD_PIN_LED_ACTIVITY);
-	gpio_set_output_options(
-		BOARD_PORT_LEDS,
-		GPIO_OTYPE_PP,
-		GPIO_OSPEED_2MHZ,
-		BOARD_PIN_LED_BOOTLOADER | BOARD_PIN_LED_ACTIVITY);
-	BOARD_LED_ON(
-		BOARD_PORT_LEDS,
-		BOARD_PIN_LED_BOOTLOADER | BOARD_PIN_LED_ACTIVITY);
-
-	/* enable the power controller clock */
-	rcc_peripheral_enable_clock(&RCC_APB1ENR, RCC_APB1ENR_PWREN);
+	setup_output_pin(CFG_PIN_LED);
+	setup_output_pin(CFG_PIN_LED1);
 
 	initSerialNumber();
 }
@@ -371,13 +356,6 @@ board_init(void)
 void
 board_deinit(void)
 {
-	/* deinitialise LEDs */
-	gpio_mode_setup(
-		BOARD_PORT_LEDS,
-		GPIO_MODE_INPUT,
-		GPIO_PUPD_NONE,
-		BOARD_PIN_LED_BOOTLOADER | BOARD_PIN_LED_ACTIVITY);
-
 	/* disable the power controller clock */
 	rcc_peripheral_disable_clock(&RCC_APB1ENR, RCC_APB1ENR_PWREN);
 
@@ -572,11 +550,11 @@ led_on(unsigned led)
 {
 	switch (led) {
 	case LED_ACTIVITY:
-		BOARD_LED_ON(BOARD_PORT_LEDS, BOARD_PIN_LED_ACTIVITY);
+		pin_set(CFG_PIN_LED, 1);
 		break;
 
 	case LED_BOOTLOADER:
-		BOARD_LED_ON(BOARD_PORT_LEDS, BOARD_PIN_LED_BOOTLOADER);
+		pin_set(CFG_PIN_LED1, 1);
 		break;
 	}
 }
@@ -586,25 +564,11 @@ led_off(unsigned led)
 {
 	switch (led) {
 	case LED_ACTIVITY:
-		BOARD_LED_OFF(BOARD_PORT_LEDS, BOARD_PIN_LED_ACTIVITY);
+		pin_set(CFG_PIN_LED, 0);
 		break;
 
 	case LED_BOOTLOADER:
-		BOARD_LED_OFF(BOARD_PORT_LEDS, BOARD_PIN_LED_BOOTLOADER);
-		break;
-	}
-}
-
-void
-led_toggle(unsigned led)
-{
-	switch (led) {
-	case LED_ACTIVITY:
-		gpio_toggle(BOARD_PORT_LEDS, BOARD_PIN_LED_ACTIVITY);
-		break;
-
-	case LED_BOOTLOADER:
-		gpio_toggle(BOARD_PORT_LEDS, BOARD_PIN_LED_BOOTLOADER);
+		pin_set(CFG_PIN_LED1, 0);
 		break;
 	}
 }

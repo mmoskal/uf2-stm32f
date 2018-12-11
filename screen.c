@@ -75,19 +75,28 @@ uint32_t pinport(int pin) {
     }
 }
 
-uint16_t pinmask(int pin) {
+static inline uint16_t pinmask(int pin) {
     return 1 << (pin & 0xf);
 }
 
-void setup_pin(int pincfg) {
+void setup_pin(int pincfg, int mode, int pull) {
     int pin = lookupCfg(pincfg, -1);
+    if (pin < 0)
+        return;
     uint32_t port = pinport(pin);
     uint32_t mask = pinmask(pin);
-    gpio_mode_setup(port, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, mask);
+    gpio_mode_setup(port, mode, pull, mask);
     gpio_set_output_options(port, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, mask);
 }
 
-void pin_set(int pin, int v) {
+void setup_output_pin(int pincfg) {
+    setup_pin(pincfg, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE);
+}
+
+void pin_set(int pincfg, int v) {
+    int pin = lookupCfg(pincfg, -1);
+    if (pin < 0)
+        return;
     if (v) {
         gpio_set(pinport(pin), pinmask(pin));
     } else {
@@ -144,8 +153,8 @@ static const uint8_t initCmds[] = {
 
 static uint8_t cmdBuf[20];
 
-#define SET_DC(v) pin_set(CFG(PIN_DISPLAY_DC), v)
-#define SET_CS(v) pin_set(CFG(PIN_DISPLAY_CS), v)
+#define SET_DC(v) pin_set(CFG_PIN_DISPLAY_DC, v)
+#define SET_CS(v) pin_set(CFG_PIN_DISPLAY_CS, v)
 
 static void sendCmd(uint8_t *buf, int len) {
     // make sure cmd isn't on stack
@@ -341,26 +350,22 @@ void screen_init() {
     rcc_periph_clock_enable(RCC_GPIOB);
     rcc_periph_clock_enable(RCC_GPIOC);
 
-    setup_pin(CFG_PIN_DISPLAY_SCK);
-    setup_pin(CFG_PIN_DISPLAY_MOSI);
-    setup_pin(CFG_PIN_DISPLAY_BL);
-    setup_pin(CFG_PIN_DISPLAY_DC);
-    setup_pin(CFG_PIN_DISPLAY_RST);
-    setup_pin(CFG_PIN_DISPLAY_CS);
+    setup_output_pin(CFG_PIN_DISPLAY_SCK);
+    setup_output_pin(CFG_PIN_DISPLAY_MOSI);
+    setup_output_pin(CFG_PIN_DISPLAY_BL);
+    setup_output_pin(CFG_PIN_DISPLAY_DC);
+    setup_output_pin(CFG_PIN_DISPLAY_RST);
+    setup_output_pin(CFG_PIN_DISPLAY_CS);
 
     SET_CS(1);
     SET_DC(1);
 
-    if (CFG(PIN_DISPLAY_BL) != -1) {
-        pin_set(CFG(PIN_DISPLAY_BL), 1);
-    }
+    pin_set(CFG_PIN_DISPLAY_BL, 1);
 
-    if (CFG(PIN_DISPLAY_RST) != -1) {
-        pin_set(CFG(PIN_DISPLAY_RST), 0);
-        delay(20);
-        pin_set(CFG(PIN_DISPLAY_RST), 1);
-        delay(20);
-    }
+    pin_set(CFG_PIN_DISPLAY_RST, 0);
+    delay(20);
+    pin_set(CFG_PIN_DISPLAY_RST, 1);
+    delay(20);
 
     sendCmdSeq(initCmds);
 

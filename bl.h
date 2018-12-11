@@ -103,7 +103,6 @@ extern int buf_get(void);
 #define arraySize(a) (sizeof((a))/sizeof(((a)[0])))
 extern void led_on(unsigned led);
 extern void led_off(unsigned led);
-extern void led_toggle(unsigned led);
 
 /* flash helpers from main_*.c */
 extern void board_deinit(void);
@@ -139,3 +138,7 @@ void resetIntoBootloader();
 void flash_write(uint32_t dst, const uint8_t *src, int len);
 
 #define VALID_FLASH_ADDR(addr, sz) (USER_FLASH_START <= (addr) && (addr) + (sz) <= USER_FLASH_END)
+
+void setup_output_pin(int pincfg);
+void setup_pin(int pincfg, int mode, int pull);
+void pin_set(int pincfg, int v);

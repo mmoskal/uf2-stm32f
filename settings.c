@@ -8,6 +8,8 @@ const uint32_t configValues[] = {
     CFG_PIN_DISPLAY_MISO,    PB_14,
     CFG_PIN_DISPLAY_DC,      PC_5,
     CFG_PIN_DISPLAY_RST,     PC_4,
+    CFG_PIN_LED,             PC_9,
+    CFG_PIN_LED1,            PC_8,
     CFG_DISPLAY_WIDTH,       160,
     CFG_DISPLAY_HEIGHT,      128,
     CFG_DISPLAY_CFG0,        0x00000080,
