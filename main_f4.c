@@ -12,7 +12,8 @@
 #include <libopencm3/stm32/usart.h>
 #include <libopencm3/cm3/systick.h>
 #include <libopencm3/stm32/pwr.h>
-# include <libopencm3/stm32/timer.h>
+#include <libopencm3/stm32/timer.h>
+#include <libopencm3/cm3/scb.h>
 
 #include "bl.h"
 #include <string.h>
@@ -868,4 +869,18 @@ main(void)
 		/* launching the app failed - stay in the bootloader forever */
 		timeout = 0;
 	}
+}
+
+void flushFlash(void);
+
+void resetIntoApp() {
+	flushFlash();
+	board_set_rtc_signature(APP_RTC_SIGNATURE);
+	scb_reset_system();
+}
+
+void resetIntoBootloader() {
+	flushFlash();
+	board_set_rtc_signature(BOOT_RTC_SIGNATURE);
+	scb_reset_system();
 }

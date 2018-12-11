@@ -106,6 +106,22 @@ static const struct usb_endpoint_descriptor msc_endp[] = {{
 	.bInterval = 0,
 }};
 
+static const struct usb_endpoint_descriptor hf2_endp[] = {{
+	.bLength = USB_DT_ENDPOINT_SIZE,
+	.bDescriptorType = USB_DT_ENDPOINT,
+	.bEndpointAddress = HF2_EP_OUT,
+	.bmAttributes = USB_ENDPOINT_ATTR_INTERRUPT,
+	.wMaxPacketSize = 64,
+	.bInterval = 1,
+}, {
+	.bLength = USB_DT_ENDPOINT_SIZE,
+	.bDescriptorType = USB_DT_ENDPOINT,
+	.bEndpointAddress = HF2_EP_IN,
+	.bmAttributes = USB_ENDPOINT_ATTR_INTERRUPT,
+	.wMaxPacketSize = 64,
+	.bInterval = 1,
+}};
+
 static const struct usb_interface_descriptor msc_iface = {
 	.bLength = USB_DT_INTERFACE_SIZE,
 	.bDescriptorType = USB_DT_INTERFACE,
@@ -121,10 +137,29 @@ static const struct usb_interface_descriptor msc_iface = {
 	.extralen = 0
 };
 
+static const struct usb_interface_descriptor hf2_iface = {
+	.bLength = USB_DT_INTERFACE_SIZE,
+	.bDescriptorType = USB_DT_INTERFACE,
+	.bInterfaceNumber = INTF_HF2,
+	.bAlternateSetting = 0,
+	.bNumEndpoints = 2,
+	.bInterfaceClass = 0xFF,
+	.bInterfaceSubClass = 0x45,
+	.bInterfaceProtocol = 0xAF,
+	.iInterface = 0,
+	.endpoint = hf2_endp,
+	.extra = NULL,
+	.extralen = 0
+};
+
 static const struct usb_interface ifaces[] = {
     {
         .num_altsetting = 1,
         .altsetting = &msc_iface,
+    },    
+    {
+        .num_altsetting = 1,
+        .altsetting = &hf2_iface,
     },    
 };
 
@@ -132,7 +167,7 @@ static const struct usb_config_descriptor config = {
 	.bLength = USB_DT_CONFIGURATION_SIZE,
 	.bDescriptorType = USB_DT_CONFIGURATION,
 	.wTotalLength = 0,
-	.bNumInterfaces = 1,
+	.bNumInterfaces = 2,
 	.bConfigurationValue = 1,
 	.iConfiguration = 0,
 	.bmAttributes = 0x80,
@@ -158,6 +193,8 @@ static void usb_set_config(usbd_device *usbd_dev, uint16_t wValue)
 	(void)wValue;
 	usb_enumerated();
 }
+
+void hf2_init(usbd_device *usbd_dev);
 
 void
 usb_cinit(void)
@@ -204,6 +241,8 @@ usb_cinit(void)
 	usb_msc_init(usbd_dev, 0x82, 64, 0x01, 64, "Example Ltd", "UF2 Bootloader",
 		    "42.00", UF2_NUM_BLOCKS, read_block, write_block);
 
+	hf2_init(usbd_dev);
+	
 #if defined(STM32F4)
 
 	if (OTG_FS_CID == OTG_CID_HAS_VBDEN) {

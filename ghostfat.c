@@ -153,7 +153,7 @@ static uint8_t flashBuf[FLASH_PAGE_SIZE] __attribute__((aligned(4)));
 static bool firstFlush = true;
 static uint32_t lastFlush;
 
-static void flushFlash(void) {
+void flushFlash(void) {
     lastFlush = ms;
     if (flashAddr == NO_CACHE)
         return;
@@ -178,7 +178,7 @@ static void flushFlash(void) {
     flashAddr = NO_CACHE;
 }
 
-static void flash_write(uint32_t dst, const uint8_t *src, int len) {
+void flash_write(uint32_t dst, const uint8_t *src, int len) {
     uint32_t newAddr = dst & ~(FLASH_PAGE_SIZE - 1);
 
     if (newAddr != flashAddr) {
@@ -190,8 +190,7 @@ static void flash_write(uint32_t dst, const uint8_t *src, int len) {
 }
 #else
 // defined in main_f4.c
-void flash_write(uint32_t dst, const uint8_t *src, int len);
-static void flushFlash(void) {}
+void flushFlash(void) {}
 #endif
 
 static void uf2_timer_start(int delay) {
@@ -314,7 +313,7 @@ static void write_block_core(uint32_t block_no, const uint8_t *data, bool quiet,
     }
 
     if ((bl->flags & UF2_FLAG_NOFLASH) || bl->payloadSize > 256 || (bl->targetAddr & 0xff) ||
-        bl->targetAddr < USER_FLASH_START || bl->targetAddr + bl->payloadSize > USER_FLASH_END) {
+        !VALID_FLASH_ADDR(bl->targetAddr, bl->payloadSize)) {
         DBG("Skip block at %x", bl->targetAddr);
         // this happens when we're trying to re-flash CURRENT.UF2 file previously
         // copied from a device; we still want to count these blocks to reset properly

@@ -129,3 +129,13 @@ extern int cin(void);
 extern void cout(uint8_t *buf, unsigned len);
 
 #define INTF_MSC                0
+#define INTF_HF2                1
+
+#define HF2_EP_IN 0x83
+#define HF2_EP_OUT 0x03
+
+void resetIntoApp();
+void resetIntoBootloader();
+void flash_write(uint32_t dst, const uint8_t *src, int len);
+
+#define VALID_FLASH_ADDR(addr, sz) (USER_FLASH_START <= (addr) && (addr) + (sz) <= USER_FLASH_END)
