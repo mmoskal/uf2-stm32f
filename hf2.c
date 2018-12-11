@@ -24,7 +24,6 @@
 
 typedef struct {
     uint16_t size;
-    uint8_t serial;
     union {
         uint8_t buf[HF2_BUF_SIZE];
         uint32_t buf32[HF2_BUF_SIZE / 4];
@@ -38,7 +37,6 @@ HF2_Buffer pkt;
 
 const uint8_t *dataToSend;
 volatile uint32_t dataToSendLength;
-bool dataToSendPrepend;
 uint8_t dataToSendFlag;
 static usbd_device *_usbd_dev;
 
@@ -50,25 +48,19 @@ static void pokeSend() {
 
     cm_disable_interrupts();
     if (dataToSendLength) {
-        if (dataToSendPrepend) {
-            dataToSendPrepend = false;
-            buf[0] = HF2_FLAG_CMDPKT_BODY | 4;
-            memcpy(buf + 1, pkt.buf, 4);
+        int flag = dataToSendFlag;
+        int s = 63;
+        if (dataToSendLength <= 63) {
+            s = dataToSendLength;
         } else {
-            int flag = dataToSendFlag;
-            int s = 63;
-            if (dataToSendLength <= 63) {
-                s = dataToSendLength;
-            } else {
-                if (flag == HF2_FLAG_CMDPKT_LAST)
-                    flag = HF2_FLAG_CMDPKT_BODY;
-            }
-
-            buf[0] = flag | s;
-            memcpy(buf + 1, dataToSend, s);
-            dataToSend += s;
-            dataToSendLength -= s;
+            if (flag == HF2_FLAG_CMDPKT_LAST)
+                flag = HF2_FLAG_CMDPKT_BODY;
         }
+
+        buf[0] = flag | s;
+        memcpy(buf + 1, dataToSend, s);
+        dataToSend += s;
+        dataToSendLength -= s;
         sendIt = true;
     }
     cm_enable_interrupts();
@@ -79,34 +71,12 @@ static void pokeSend() {
 
 static void send_hf2_response(int size) {
     dataToSend = pkt.buf;
-    dataToSendPrepend = false;
     dataToSendFlag = HF2_FLAG_CMDPKT_LAST;
     dataToSendLength = 4 + size;
     pokeSend();
 }
 
-#if 0
-static void sendResponseWithData(const void *data, int size) {
-    usb_assert(!dataToSendLength);
-    if (size <= (int)sizeof(pkt.buf) - 4) {
-        memcpy(pkt.resp.data8, data, size);
-        return send_hf2_response(size);
-    } else {
-        dataToSend = (const uint8_t *)data;
-        dataToSendPrepend = true;
-        dataToSendFlag = HF2_FLAG_CMDPKT_LAST;
-        dataToSendLength = size;
-        pokeSend();
-    }
-}
-#endif
-
 extern const char infoUf2File[];
-
-void copy_words(uint32_t *dst, uint32_t *src, uint32_t n_words) {
-    while (n_words--)
-        *dst++ = *src++;
-}
 
 #define checkDataSize(str, add) assert(sz == 8 + sizeof(cmd->str) + (add))
 
@@ -152,21 +122,10 @@ static void handle_command() {
         // first send ACK and then start writing, while getting the next packet
         send_hf2_response(0);
         if (VALID_FLASH_ADDR(cmd->write_flash_page.target_addr, 256)) {
-            flash_write(cmd->write_flash_page.target_addr, (const uint8_t*)cmd->write_flash_page.data, 256);
+            flash_write(cmd->write_flash_page.target_addr,
+                        (const uint8_t *)cmd->write_flash_page.data, 256);
         }
         return;
-    case HF2_CMD_WRITE_WORDS:
-        checkDataSize(write_words, cmd->write_words.num_words << 2);
-        copy_words((void *)cmd->write_words.target_addr, cmd->write_words.words,
-                   cmd->write_words.num_words);
-        break;
-    case HF2_CMD_READ_WORDS:
-        checkDataSize(read_words, 0);
-        tmp = cmd->read_words.num_words;
-        copy_words(resp->data32, (void *)cmd->read_words.target_addr, tmp);
-        send_hf2_response(tmp << 2);
-        return;
-
     default:
         // command not understood
         resp->status16 = HF2_STATUS_INVALID_CMD;
@@ -195,15 +154,9 @@ static void hf2_data_rx_cb(usbd_device *usbd_dev, uint8_t ep) {
     pkt.size += size;
     tag &= HF2_FLAG_MASK;
     if (tag != HF2_FLAG_CMDPKT_BODY) {
-        if (tag == HF2_FLAG_CMDPKT_LAST)
-            pkt.serial = 0;
-        else if (tag == HF2_FLAG_SERIAL_OUT)
-            pkt.serial = 1;
-        else
-            pkt.serial = 2;
-        if (pkt.serial == 0)
+        if (tag == HF2_FLAG_CMDPKT_LAST) {
             handle_command();
-        else {
+        } else {
             // do something about serial?
         }
         pkt.size = 0;
