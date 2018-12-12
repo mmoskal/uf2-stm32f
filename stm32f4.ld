@@ -36,8 +36,9 @@
 /* Define memory regions. */
 MEMORY
 {
-	rom (rx)  : ORIGIN = 0x08000000, LENGTH = 16K - 64
-	settings (rx)  : ORIGIN = 0x8003fc0, LENGTH = 64
+	rom (rx)  : ORIGIN = 0x08000000, LENGTH = 16K - 512
+	config (rx)  : ORIGIN = 0x8004000 - 512, LENGTH = 512 - 64
+	settings (rx)  : ORIGIN = 0x8004000 - 64, LENGTH = 64
 	ram (rwx) : ORIGIN = 0x20000000, LENGTH = 64K
 }
 
@@ -81,6 +82,11 @@ SECTIONS
 		__fini_array_end = .;
 	} >rom
 
+
+        . = ORIGIN(config);
+        .config : {
+                KEEP (*(.config))
+        } >config
 
         . = ORIGIN(settings);
         .settings : {

@@ -1,67 +1,51 @@
 #include "bl.h"
 
-// clang-format off
-const uint32_t configValues[] = {
-    CFG_PIN_DISPLAY_CS,      PB_12,
-    CFG_PIN_DISPLAY_SCK,     PB_13,
-    CFG_PIN_DISPLAY_MOSI,    PB_15,
-    CFG_PIN_DISPLAY_MISO,    PB_14,
-    CFG_PIN_DISPLAY_DC,      PC_5,
-    CFG_PIN_DISPLAY_RST,     PC_4,
-    CFG_PIN_LED,             PC_9,
-    CFG_PIN_LED1,            PC_8,
-    CFG_DISPLAY_WIDTH,       160,
-    CFG_DISPLAY_HEIGHT,      128,
-    CFG_DISPLAY_CFG0,        0x00000080,
-    CFG_DISPLAY_CFG1,        0x000603,
-    CFG_DISPLAY_CFG2,        22,
-#if defined(TARGET_HW_BRAINGAMES) || defined(TARGET_HW_BRAINGAMES_REVB)
-    CFG_PIN_BTN_UP,          PA_5,
-    CFG_PIN_BTN_LEFT,        PA_15,
-    CFG_PIN_BTN_DOWN,        PB_10,
-    CFG_PIN_BTN_RIGHT,       PC_13,
-    CFG_PIN_BTN_A,           PB_1,
-    CFG_PIN_BTN_B,           PB_0,
-    CFG_PIN_BTN_MENU,        PC_10,
-    CFG_PIN_DISPLAY_BL,      PC_7,
-
-#ifdef TARGET_HW_BRAINGAMES_REVB
-    CFG_PIN_JACK_SND,        PA_8,
-    CFG_PIN_JACK_BZEN,       PA_10,
-    CFG_PIN_JACK_HPEN,       PA_4,
-    CFG_PIN_JACK_SENSE,      PA_6,
-    CFG_PIN_JACK_TX,         PA_9,
-    CFG_PIN_JACK_PWREN,      PA_7,
-#else
-    CFG_PIN_JACK_SND,        PA_8,
-    CFG_PIN_JACK_BZEN,       PA_10,
-    CFG_PIN_JACK_HPEN,       PA_2,
-    CFG_PIN_JACK_SENSE,      PB_3,
-    CFG_PIN_JACK_TX,         PA_9,
-    CFG_PIN_JACK_PWREN,      PB_5,
-#endif
-
-#else
-    CFG_PIN_DISPLAY_BL,      PA_4,
-    CFG_PIN_BTN_LEFT,        PB_10,
-    CFG_PIN_BTN_UP,          PA_15,
-    CFG_PIN_BTN_RIGHT,       PA_5,
-    CFG_PIN_BTN_DOWN,        PC_13,
-    CFG_PIN_BTN_A,           PB_7,
-    CFG_PIN_BTN_B,           PB_6,
-#endif
+__attribute__((section(".config"))) __attribute__((used)) //
+const uint32_t configData[] = {
+    0x1e9e10f1, 0x20227a79, // magic
+    30, 0, // num. entries; reserved
+    4, 0x11, // PIN_BTN_A
+    5, 0x10, // PIN_BTN_B
+    13, 0x29, // PIN_LED
+    32, 0x1d, // PIN_DISPLAY_SCK
+    33, 0x1e, // PIN_DISPLAY_MISO
+    34, 0x1f, // PIN_DISPLAY_MOSI
+    35, 0x1c, // PIN_DISPLAY_CS
+    36, 0x25, // PIN_DISPLAY_DC
+    37, 0xa0, // DISPLAY_WIDTH
+    38, 0x80, // DISPLAY_HEIGHT
+    39, 0x80, // DISPLAY_CFG0
+    40, 0x603, // DISPLAY_CFG1
+    41, 0x16, // DISPLAY_CFG2
+    43, 0x24, // PIN_DISPLAY_RST
+    44, 0x27, // PIN_DISPLAY_BL
+    47, 0xf, // PIN_BTN_LEFT
+    48, 0x2d, // PIN_BTN_RIGHT
+    49, 0x5, // PIN_BTN_UP
+    50, 0x1a, // PIN_BTN_DOWN
+    51, 0x2a, // PIN_BTN_MENU
+    55, 0x28, // PIN_LED1
+    60, 0x9, // PIN_JACK_TX
+    61, 0x6, // PIN_JACK_SENSE
+    62, 0x4, // PIN_JACK_HPEN
+    63, 0xa, // PIN_JACK_BZEN
+    64, 0x7, // PIN_JACK_PWREN
+    65, 0x8, // PIN_JACK_SND
+    66, 0x28, // PIN_JACK_BUSLED
+    67, 0x29, // PIN_JACK_COMMLED
+    208, 0x16e42d61, // BOOTLOADER_BOARD_ID
     0, 0
 };
-// clang-format on
+
 
 uint32_t lookupCfg(uint32_t key, uint32_t defl) {
-    const uint32_t *ptr = configValues;
+    const uint32_t *ptr = configData + 4;
     while (*ptr) {
         if (*ptr == key)
             return ptr[1];
         ptr += 2;
     }
-    if (defl == 0x42004200)
+    if (defl == 0x42)
         while (1)
             ;
     return defl;
@@ -72,7 +56,7 @@ __attribute__((section(".settings"))) __attribute__((used)) //
 const struct Settings settings = {
     .magic0 = SETTINGS_MAGIC_0,
     .magic1 = SETTINGS_MAGIC_1,
-    .configValues = configValues,
+    .configValues = configData + 4,
     .hseValue = OSC_FREQ * 1000000,
     .infoUF2 = infoUf2File,
     .manufacturer = USBMFGSTRING,
