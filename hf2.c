@@ -132,6 +132,7 @@ static void handle_command() {
         resp->bininfo.flash_page_size = 128 * 1024;
         resp->bininfo.flash_num_pages = BOARD_FLASH_SIZE / (128 * 1024);
         resp->bininfo.max_message_size = sizeof(pkt.buf);
+        resp->bininfo.uf2_family = UF2_FAMILY;
         send_hf2_response(sizeof(resp->bininfo));
         return;
 
