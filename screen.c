@@ -253,6 +253,23 @@ static void printch(int x, int y, int col, const uint8_t *fnt) {
     }
 }
 
+static void printch4(int x, int y, int col, const uint8_t *fnt) {
+    for (int i = 0; i < 8 * 4; ++i) {
+        uint8_t *p = fb + (x + i) * DISPLAY_HEIGHT + y;
+        uint8_t mask = 0x01;
+        for (int j = 0; j < 8; ++j) {
+            for (int k = 0; k < 4; ++k) {
+                if (*fnt & mask)
+                    *p = col;
+                p++;
+            }
+            mask <<= 1;
+        }
+        if ((i & 3) == 3)
+            fnt++;
+    }
+}
+
 void printicon(int x, int y, int col, const uint8_t *icon) {
     int w = *icon++;
     int h = *icon++;
@@ -296,9 +313,10 @@ void printicon(int x, int y, int col, const uint8_t *icon) {
 }
 
 void print(int x, int y, int col, const char *text) {
-    int x0 = x;
+    // int x0 = x;
     while (*text) {
         char c = *text++;
+        /*
         if (c == '\r')
             continue;
         if (c == '\n') {
@@ -314,9 +332,19 @@ void print(int x, int y, int col, const char *text) {
             c = '?';
         if (c >= 0x7f)
             c = '?';
+        */
         c -= ' ';
         printch(x, y, col, &font8[c * 8]);
         x += 8;
+    }
+}
+
+void print4(int x, int y, int col, const char *text) {
+    while (*text) {
+        char c = *text++;
+        c -= ' ';
+        printch4(x, y, col, &font8[c * 8]);
+        x += 8 * 4;
     }
 }
 
@@ -382,22 +410,21 @@ void screen_init() {
     configure(madctl, frmctr1);
     setAddrWindow(offX, offY, CFG(DISPLAY_WIDTH), CFG(DISPLAY_HEIGHT));
 
-    memset(fb, 10, sizeof(fb));
-    drawBar(0, 14, 4);
-    print(4, 3, 1, "arcade.makecode.com");
+    memset(fb, 0, sizeof(fb));
+    drawBar(0, 52, 10);
+    drawBar(52, 55, 8);
+    drawBar(107, 14, 4);
 
-#define DRAG 25
+    print4(20, 12, 1, "F401");
+    print(3, 110, 1, "arcade.makecode.com");
+
+#define DRAG 70
 #define DRAGX 10
     printicon(DRAGX + 20, DRAG + 5, 1, fileLogo);
-    printicon(DRAGX + 65, DRAG, 1, arrowLogo);
-    printicon(DRAGX + 110, DRAG, 1, pendriveLogo);
-    print(DRAGX - 2, DRAG + 37, 1, "arcade.uf2");
-    print(DRAGX + 95, DRAG + 37, 1, "ARCADE");
-
-    drawBar(128 - 45, 45, 3);
-    // printicon(DISPLAY_WIDTH - 36, 90, 1, mkcdLogo);
-    printicon(5, 90, 1, ghiLogo);
-    print(40, 99, 1, USBDEVICESTRING);
+    printicon(DRAGX + 66, DRAG, 1, arrowLogo);
+    printicon(DRAGX + 108, DRAG, 1, pendriveLogo);
+    print(1, DRAG - 12, 1, "arcade.uf2");
+    print(90, DRAG - 12, 1, "ARCD-F401");
 
     draw_screen();
 }

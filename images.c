@@ -1,5 +1,7 @@
 #include <stdint.h>
 
+// all https://makecode.com/_FDFFVsKaTUfF
+
 #if 0
 // https://makecode.com/_cdKWqYhY6EPr
 const uint8_t mkcdLogo[] = {
