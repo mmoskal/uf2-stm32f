@@ -973,13 +973,13 @@
 # define BOARD_FLASH_SECTORS            8
 # define BOARD_FLASH_SIZE               (512 * 1024)
 
-
-# define BOARD_PIN_LED_ACTIVITY         GPIO8
-# define BOARD_PIN_LED_BOOTLOADER       GPIO9
-# define BOARD_PORT_LEDS                GPIOC
-# define BOARD_CLOCK_LEDS               RCC_AHB1ENR_IOPCEN
-# define BOARD_LED_ON                   gpio_set
-# define BOARD_LED_OFF                  gpio_clear
+// Not used
+# define BOARD_PIN_LED_ACTIVITY         GPIO8x
+# define BOARD_PIN_LED_BOOTLOADER       GPIO9x
+# define BOARD_PORT_LEDS                GPIOCx
+# define BOARD_CLOCK_LEDS               RCC_AHB1ENR_IOPCENx
+# define BOARD_LED_ON                   gpio_setx
+# define BOARD_LED_OFF                  gpio_clearx
 
 # define BOARD_USB_VBUS_SENSE_DISABLED
 //# define BOARD_PIN_VBUS                 GPIO5
