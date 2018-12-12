@@ -347,6 +347,9 @@ board_init(void)
 	// enable all GPIO clocks
 	RCC_AHB1ENR |= RCC_AHB1ENR_IOPAEN|RCC_AHB1ENR_IOPBEN|RCC_AHB1ENR_IOPCEN|BOARD_CLOCK_VBUS;
 
+	// make sure JACDAC line is up, otherwise trashes the bus
+	setup_pin(CFG_PIN_JACK_TX, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP);
+
 	setup_output_pin(CFG_PIN_LED);
 	setup_output_pin(CFG_PIN_LED1);
 
