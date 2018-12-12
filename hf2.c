@@ -16,7 +16,7 @@
 
 #include "uf2hid.h"
 
-#define HF2_BUF_SIZE 512
+#define HF2_BUF_SIZE 1024 + 16
 
 #define usb_assert assert
 
@@ -78,7 +78,35 @@ static void send_hf2_response(int size) {
 
 extern const char infoUf2File[];
 
+#define MURMUR3 0
+
 #define checkDataSize(str, add) assert(sz == 8 + sizeof(cmd->str) + (add))
+
+#if MURMUR3
+static void murmur3_core_2(const void *data, uint32_t len, uint32_t *dst) {
+    // compute two hashes with different seeds in parallel, hopefully reducing
+    // collisions
+    uint32_t h0 = 0x2F9BE6CC;
+    uint32_t h1 = 0x1EC3A6C8;
+    const uint32_t *data32 = (const uint32_t *)data;
+    while (len--) {
+        uint32_t k = *data32++;
+        k *= 0xcc9e2d51;
+        k = (k << 15) | (k >> 17);
+        k *= 0x1b873593;
+
+        h0 ^= k;
+        h1 ^= k;
+        h0 = (h0 << 13) | (h0 >> 19);
+        h1 = (h1 << 13) | (h1 >> 19);
+        h0 = (h0 * 5) + 0xe6546b64;
+        h1 = (h1 * 5) + 0xe6546b64;
+    }
+
+    dst[0] = h0;
+    dst[1] = h1;
+}
+#endif
 
 static void handle_command() {
     int tmp;
@@ -101,8 +129,8 @@ static void handle_command() {
 
     case HF2_CMD_BININFO:
         resp->bininfo.mode = HF2_MODE_BOOTLOADER;
-        resp->bininfo.flash_page_size = 256;
-        resp->bininfo.flash_num_pages = BOARD_FLASH_SIZE / 256;
+        resp->bininfo.flash_page_size = 128 * 1024;
+        resp->bininfo.flash_num_pages = BOARD_FLASH_SIZE / (128 * 1024);
         resp->bininfo.max_message_size = sizeof(pkt.buf);
         send_hf2_response(sizeof(resp->bininfo));
         return;
@@ -126,6 +154,19 @@ static void handle_command() {
                         (const uint8_t *)cmd->write_flash_page.data, 256);
         }
         return;
+    case HF2_CMD_READ_WORDS:
+        checkDataSize(read_words, 0);
+        tmp = cmd->read_words.num_words;
+        memcpy(resp->data32, (void *)cmd->read_words.target_addr, tmp << 2);
+        send_hf2_response(tmp << 2);
+        return;
+#if MURMUR3
+    case HF2_CMD_MURMUR3:
+        checkDataSize(murmur3, 0);
+        murmur3_core_2((void *)cmd->murmur3.target_addr, cmd->murmur3.num_words, resp->data32);
+        send_hf2_response(8);
+        return;
+#endif
     default:
         // command not understood
         resp->status16 = HF2_STATUS_INVALID_CMD;

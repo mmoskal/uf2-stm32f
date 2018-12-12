@@ -189,7 +189,6 @@ void flash_write(uint32_t dst, const uint8_t *src, int len) {
     memcpy(flashBuf + (dst & (FLASH_PAGE_SIZE - 1)), src, len);
 }
 #else
-// defined in main_f4.c
 void flushFlash(void) {}
 #endif
 

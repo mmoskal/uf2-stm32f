@@ -62,6 +62,16 @@ struct HF2_WRITE_WORDS_Command {
 // no arguments
 // results is utf8 character array
 
+#define HF2_CMD_MURMUR3 0x0011
+struct HF2_MURMUR3_Command {
+    uint32_t target_addr;
+    uint32_t num_words;
+};
+struct HF2_MURMUR3_Result {
+    uint32_t checksum0;
+    uint32_t checksum1;
+};
+
 typedef struct {
     uint32_t command_id;
     uint16_t tag;
@@ -73,6 +83,7 @@ typedef struct {
         struct HF2_WRITE_WORDS_Command write_words;
         struct HF2_READ_WORDS_Command read_words;
         struct HF2_CHKSUM_PAGES_Command chksum_pages;
+        struct HF2_MURMUR3_Command murmur3;
         uint8_t data8[0];
         uint16_t data16[0];
         uint32_t data32[0];
