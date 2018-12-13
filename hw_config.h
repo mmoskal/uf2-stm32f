@@ -951,7 +951,7 @@
 #elif  defined(TARGET_HW_BRAINPAD) || defined(TARGET_HW_BRAINGAMES) || defined(TARGET_HW_BRAINGAMES_REVB)
 
 # define UF2_FAMILY                     0x57755a57
-# define APP_LOAD_ADDRESS               0x08008000
+# define APP_LOAD_ADDRESS               0x08010000
 # define BOOTLOADER_DELAY               1000
 # define BOARD_OMNIBUSF4SD
 # define INTERFACE_USB                  1

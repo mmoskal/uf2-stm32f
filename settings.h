@@ -19,5 +19,5 @@ struct Settings {
 uint32_t lookupCfg(uint32_t key, uint32_t defl);
 #define CFG(v) lookupCfg(CFG_ ## v, 0x42)
 
-#define BOOT_SETTINGS ((struct Settings*)0x8003fc0)
+#define BOOT_SETTINGS ((struct Settings*)0x8007fc0)
 
