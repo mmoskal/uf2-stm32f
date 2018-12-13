@@ -142,3 +142,9 @@ void flash_write(uint32_t dst, const uint8_t *src, int len);
 void setup_output_pin(int pincfg);
 void setup_pin(int pincfg, int mode, int pull);
 void pin_set(int pincfg, int v);
+
+uint32_t pinport(int pin);
+static inline uint16_t pinmask(int pin) {
+    return 1 << (pin & 0xf);
+}
+

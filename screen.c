@@ -56,53 +56,6 @@
 #define ST7735_GMCTRP1 0xE0
 #define ST7735_GMCTRN1 0xE1
 
-void panic() {
-    for (;;)
-        ;
-}
-
-uint32_t pinport(int pin) {
-    switch (pin >> 4) {
-    case 0:
-        return GPIOA;
-    case 1:
-        return GPIOB;
-    case 2:
-        return GPIOC;
-    default:
-        panic();
-        return 0;
-    }
-}
-
-static inline uint16_t pinmask(int pin) {
-    return 1 << (pin & 0xf);
-}
-
-void setup_pin(int pincfg, int mode, int pull) {
-    int pin = lookupCfg(pincfg, -1);
-    if (pin < 0)
-        return;
-    uint32_t port = pinport(pin);
-    uint32_t mask = pinmask(pin);
-    gpio_mode_setup(port, mode, pull, mask);
-    gpio_set_output_options(port, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, mask);
-}
-
-void setup_output_pin(int pincfg) {
-    setup_pin(pincfg, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE);
-}
-
-void pin_set(int pincfg, int v) {
-    int pin = lookupCfg(pincfg, -1);
-    if (pin < 0)
-        return;
-    if (v) {
-        gpio_set(pinport(pin), pinmask(pin));
-    } else {
-        gpio_clear(pinport(pin), pinmask(pin));
-    }
-}
 
 void transfer(uint8_t *ptr, uint32_t len) {
     int mosi = CFG(PIN_DISPLAY_MOSI);

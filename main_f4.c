@@ -581,6 +581,8 @@ led_off(unsigned led)
 # define SCB_CPACR (*((volatile uint32_t *) (((0xE000E000UL) + 0x0D00UL) + 0x088)))
 #endif
 
+void flash_bootloader(void);
+
 int
 main(void)
 {
@@ -608,6 +610,12 @@ main(void)
 
 	/* configure the clock for bootloader activity */
 	clock_init();
+
+	#ifdef BL_FLASHER
+	
+	flash_bootloader();
+
+	#else
 
 	/*
 	 * Check the force-bootloader register; if we find the signature there, don't
@@ -701,6 +709,8 @@ main(void)
 		/* launching the app failed - stay in the bootloader forever */
 		timeout = 0;
 	}
+
+	#endif
 }
 
 void flushFlash(void);

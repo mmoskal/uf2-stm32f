@@ -11,3 +11,4 @@ Bootloader.zip
 Bootloader.sublime-workspace
 .gdbinit
 .vscode
+*.uf2

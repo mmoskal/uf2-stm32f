@@ -37,20 +37,6 @@ const uint32_t configData[] = {
     0, 0
 };
 
-
-uint32_t lookupCfg(uint32_t key, uint32_t defl) {
-    const uint32_t *ptr = configData + 4;
-    while (*ptr) {
-        if (*ptr == key)
-            return ptr[1];
-        ptr += 2;
-    }
-    if (defl == 0x42)
-        while (1)
-            ;
-    return defl;
-}
-
 extern const char infoUf2File[];
 __attribute__((section(".settings"))) __attribute__((used)) //
 const struct Settings settings = {

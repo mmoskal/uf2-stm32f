@@ -29,9 +29,10 @@ export FLAGS		 = -std=gnu99 \
 			   -lnosys \
 			   -Wl,-gc-sections \
 			   -Wl,-g \
+			   -Wno-unused \
 			   -Werror
 
-export COMMON_SRCS	 = bl.c usb.c usb_msc.c ghostfat.c dmesg.c screen.c images.c settings.c hf2.c support.c webusb.c winusb.c
+export COMMON_SRCS	 = bl.c usb.c usb_msc.c ghostfat.c dmesg.c screen.c images.c settings.c hf2.c support.c webusb.c winusb.c util.c
 
 #
 # Bootloaders to build
