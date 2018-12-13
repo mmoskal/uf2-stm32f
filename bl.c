@@ -92,6 +92,11 @@ void jump_to_app() {
         return;
     }
 
+    // first word is stack base - needs to be in RAM region and word-aligned
+    if ((app_base[0] & 0xff000003) != 0x20000000) {
+        return;
+    }
+
     /*
      * The second word of the app is the entrypoint; it must point within the
      * flash area (or we have a bad flash).
