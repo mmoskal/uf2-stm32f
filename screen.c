@@ -56,7 +56,6 @@
 #define ST7735_GMCTRP1 0xE0
 #define ST7735_GMCTRN1 0xE1
 
-
 void transfer(uint8_t *ptr, uint32_t len) {
     int mosi = CFG(PIN_DISPLAY_MOSI);
     int sck = CFG(PIN_DISPLAY_SCK);
@@ -266,10 +265,9 @@ void printicon(int x, int y, int col, const uint8_t *icon) {
 }
 
 void print(int x, int y, int col, const char *text) {
-    // int x0 = x;
+    int x0 = x;
     while (*text) {
         char c = *text++;
-        /*
         if (c == '\r')
             continue;
         if (c == '\n') {
@@ -277,15 +275,16 @@ void print(int x, int y, int col, const char *text) {
             y += 10;
             continue;
         }
+        /*
         if (x + 8 > DISPLAY_WIDTH) {
             x = x0;
             y += 10;
         }
+        */
         if (c < ' ')
             c = '?';
         if (c >= 0x7f)
             c = '?';
-        */
         c -= ' ';
         printch(x, y, col, &font8[c * 8]);
         x += 8;
@@ -326,6 +325,31 @@ void drawBar(int y, int h, int c) {
     }
 }
 
+void draw_hf2() {
+    print4(20, 22, 5, "<-->");
+    print(40, 110, 7, "flashing...");
+    draw_screen();
+}
+
+void draw_drag() {
+    drawBar(0, 52, 10);
+    drawBar(52, 55, 8);
+    drawBar(107, 14, 4);
+
+    print4(20, 12, 1, "F401");
+    print(3, 110, 1, "arcade.makecode.com");
+
+#define DRAG 70
+#define DRAGX 10
+    printicon(DRAGX + 20, DRAG + 5, 1, fileLogo);
+    printicon(DRAGX + 66, DRAG, 1, arrowLogo);
+    printicon(DRAGX + 108, DRAG, 1, pendriveLogo);
+    print(1, DRAG - 12, 1, "arcade.uf2");
+    print(90, DRAG - 12, 1, "ARCD-F401");
+
+    draw_screen();
+}
+
 void screen_init() {
     rcc_periph_clock_enable(RCC_GPIOA);
     rcc_periph_clock_enable(RCC_GPIOB);
@@ -364,20 +388,4 @@ void screen_init() {
     setAddrWindow(offX, offY, CFG(DISPLAY_WIDTH), CFG(DISPLAY_HEIGHT));
 
     memset(fb, 0, sizeof(fb));
-    drawBar(0, 52, 10);
-    drawBar(52, 55, 8);
-    drawBar(107, 14, 4);
-
-    print4(20, 12, 1, "F401");
-    print(3, 110, 1, "arcade.makecode.com");
-
-#define DRAG 70
-#define DRAGX 10
-    printicon(DRAGX + 20, DRAG + 5, 1, fileLogo);
-    printicon(DRAGX + 66, DRAG, 1, arrowLogo);
-    printicon(DRAGX + 108, DRAG, 1, pendriveLogo);
-    print(1, DRAG - 12, 1, "arcade.uf2");
-    print(90, DRAG - 12, 1, "ARCD-F401");
-
-    draw_screen();
 }

@@ -155,6 +155,7 @@ static void board_init(void);
 #define BOOT_RTC_SIGNATURE          0x71a21877
 #define APP_RTC_SIGNATURE           0x24a22d12
 #define POWER_DOWN_RTC_SIGNATURE    0x5019684f // Written by app fw to not re-power on.
+#define HF2_RTC_SIGNATURE           0x39a63a78
 #define BOOT_RTC_REG                MMIO32(RTC_BASE + 0x50)
 
 /* standard clocking for all F4 boards */
@@ -582,6 +583,7 @@ led_off(unsigned led)
 #endif
 
 void flash_bootloader(void);
+int hf2_mode = 0;
 
 int
 main(void)
@@ -617,11 +619,31 @@ main(void)
 
 	#else
 
+	uint32_t bootSig = board_get_rtc_signature();
+
+	DMESG("bootsig: %p", bootSig);
+
+
+	/*
+	* Clear the signature so that if someone resets us while we're
+	* in the bootloader we'll try to boot next time.
+	*/
+	if (bootSig)
+		board_set_rtc_signature(0);
+
+	//bootSig = HF2_RTC_SIGNATURE;
+
+	if (bootSig == HF2_RTC_SIGNATURE) {
+		try_boot = false;
+		timeout = 2000;
+		hf2_mode = 1;
+	}
+
 	/*
 	 * Check the force-bootloader register; if we find the signature there, don't
 	 * try booting.
 	 */
-	if (board_get_rtc_signature() == BOOT_RTC_SIGNATURE) {
+	if (bootSig == BOOT_RTC_SIGNATURE) {
 
 		/*
 		 * Don't even try to boot before dropping to the bootloader.
@@ -633,16 +655,10 @@ main(void)
 		 */
 		timeout = 0;
 
-		/*
-		 * Clear the signature so that if someone resets us while we're
-		 * in the bootloader we'll try to boot next time.
-		 */
-		board_set_rtc_signature(0);
 	}
 
-	if (board_get_rtc_signature() == APP_RTC_SIGNATURE) {
+	if (bootSig == APP_RTC_SIGNATURE) {
 		try_boot = true;
-		board_set_rtc_signature(0);
 	}
 
 	/*
@@ -684,7 +700,6 @@ main(void)
 
 	/* start the interface */
 	cinit(BOARD_INTERFACE_CONFIG_USB, USB);
-
 
 
 	while (1) {

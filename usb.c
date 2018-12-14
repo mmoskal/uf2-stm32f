@@ -125,7 +125,7 @@ static const struct usb_endpoint_descriptor hf2_endp[] = {{
 	.bInterval = 1,
 }};
 
-static const struct usb_interface_descriptor msc_iface = {
+static struct usb_interface_descriptor msc_iface = {
 	.bLength = USB_DT_INTERFACE_SIZE,
 	.bDescriptorType = USB_DT_INTERFACE,
 	.bInterfaceNumber = INTF_MSC,
@@ -215,6 +215,11 @@ void hf2_init(usbd_device *usbd_dev);
 void
 usb_cinit(void)
 {
+	if (hf2_mode) {
+		// disable MSC interface in HF2 mode
+		msc_iface.bInterfaceClass = 0xfe;
+	}
+
 #if defined(STM32F4)
 
 	rcc_peripheral_enable_clock(&RCC_AHB1ENR, RCC_AHB1ENR_IOPAEN);
@@ -254,8 +259,9 @@ usb_cinit(void)
 			     usbd_control_buffer, sizeof(usbd_control_buffer));
 #endif
 
-	usb_msc_init(usbd_dev, MSC_EP_IN, 64, MSC_EP_OUT, 64, "Example Ltd", "UF2 Bootloader",
-		    "42.00", UF2_NUM_BLOCKS, read_block, write_block);
+	if (!hf2_mode)
+		usb_msc_init(usbd_dev, MSC_EP_IN, 64, MSC_EP_OUT, 64, USBMFGSTRING, "UF2 Bootloader",
+				"42.00", UF2_NUM_BLOCKS, read_block, write_block);
 
 	hf2_init(usbd_dev);
 

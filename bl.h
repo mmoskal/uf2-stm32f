@@ -148,3 +148,11 @@ static inline uint16_t pinmask(int pin) {
     return 1 << (pin & 0xf);
 }
 
+extern int hf2_mode;
+
+void screen_init();
+void draw_drag();
+void draw_hf2();
+void print(int x, int y, int col, const char *text);
+void draw_screen();
+void print4(int x, int y, int col, const char *text);

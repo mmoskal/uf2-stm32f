@@ -120,6 +120,9 @@ static void handle_command() {
     resp->tag = cmd->tag;
     resp->status16 = HF2_STATUS_OK;
 
+    if (timer[TIMER_BL_WAIT] < 10000)
+        timer[TIMER_BL_WAIT] = 10000;
+
     switch (cmdId) {
     case HF2_CMD_INFO:
         tmp = strlen(infoUf2File);

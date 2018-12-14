@@ -53,8 +53,6 @@
 #include "bl.h"
 #include "usb.h"
 
-void screen_init();
-
 inline void cinit(void *config, uint8_t interface) {
     if (interface == USB) {
         return usb_cinit();
@@ -223,7 +221,7 @@ static uint32_t crc32(const uint8_t *src, unsigned len, unsigned state) {
 #endif
 
 void usb_enumerated() {
-    timer[TIMER_BL_WAIT] = 24 * 3600 * 1000;
+    timer[TIMER_BL_WAIT] = hf2_mode ? 10 * 1000 : 24 * 3600 * 1000;
     if (ledToBlink == LED_BOOTLOADER) {
         led_off(ledToBlink);
         ledToBlink = LED_ACTIVITY;
@@ -253,10 +251,14 @@ void bootloader(unsigned timeout) {
             return;
         }
 
-        if (!timeout || timer[TIMER_BL_WAIT] > 10000) {
+        if (!timeout || timer[TIMER_BL_WAIT] > 10000 || hf2_mode) {
             if (!screen_on) {
                 screen_on = 1;
                 screen_init();
+                if (hf2_mode)
+                    draw_hf2();
+                else
+                    draw_drag();
             }
         }
 
