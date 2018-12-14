@@ -113,16 +113,16 @@ static const struct usb_endpoint_descriptor hf2_endp[] = {{
 	.bLength = USB_DT_ENDPOINT_SIZE,
 	.bDescriptorType = USB_DT_ENDPOINT,
 	.bEndpointAddress = HF2_EP_OUT,
-	.bmAttributes = USB_ENDPOINT_ATTR_INTERRUPT,
+	.bmAttributes = USB_ENDPOINT_ATTR_BULK,
 	.wMaxPacketSize = 64,
-	.bInterval = 1,
+	.bInterval = 0,
 }, {
 	.bLength = USB_DT_ENDPOINT_SIZE,
 	.bDescriptorType = USB_DT_ENDPOINT,
 	.bEndpointAddress = HF2_EP_IN,
-	.bmAttributes = USB_ENDPOINT_ATTR_INTERRUPT,
+	.bmAttributes = USB_ENDPOINT_ATTR_BULK,
 	.wMaxPacketSize = 64,
-	.bInterval = 1,
+	.bInterval = 0,
 }};
 
 static struct usb_interface_descriptor msc_iface = {
