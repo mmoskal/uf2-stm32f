@@ -1,4 +1,4 @@
-#define UF2_VERSION "2.0.0"
+#define UF2_VERSION "2.0.2"
 #define BOARD_ID "STM32F401-BPA1A-v0"
 #define INDEX_URL "https://arcade.makecode.com"
 #define UF2_NUM_BLOCKS 8000

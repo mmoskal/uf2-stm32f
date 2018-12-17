@@ -48,16 +48,16 @@ void flash_bootloader(void) {
     flash_erase_sector(0, FLASH_CR_PROGRAM_X32);
     flash_erase_sector(1, FLASH_CR_PROGRAM_X32);
 
-    if (*(int32_t *)dst != -1) {
+    for (int i = 0; i < BINDATA_SIZE; i += 4) {
+        flash_program_word(dst + i, *(uint32_t *)(bindata + i));
+    }
+
+    if (memcmp((void*)dst, bindata, BINDATA_SIZE) != 0) {
         screen_init();
         print(3, 3, 6, "Failed to erase!");
         draw_screen();
         for (;;)
             ;
-    }
-
-    for (int i = 0; i < BINDATA_SIZE; i += 4) {
-        flash_program_word(dst + i, *(uint32_t *)(bindata + i));
     }
 
     // self-destruct

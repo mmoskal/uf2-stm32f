@@ -29,8 +29,17 @@ static void draw_menu() {
     }
 }
 
-void warning_screen() {
+#define WARNING_RTC_SIG 0x01312e8d
+
+void warning_screen(uint32_t bootSig) {
     start_systick();
+
+    if (bootSig == WARNING_RTC_SIG) {
+        flash_program_option_bytes(FLASH_OPTCR & ~0x80030000);
+        return;
+    }
+
+    board_set_rtc_signature(WARNING_RTC_SIG);
 
     screen_init();
 
@@ -72,7 +81,7 @@ void warning_screen() {
                 draw_screen();
 
                 if (menuActive == MENU_SIZE - 1) {
-                    DMESG("flashing...");
+                    //DMESG("flashing...");
                     jump_to_app();
                 }
 
@@ -81,8 +90,8 @@ void warning_screen() {
                 // enable write protection
                 flash_program_option_bytes(FLASH_OPTCR & ~0x80030000);
 
-                DMESG("OPTCR2: %p", FLASH_OPTCR);
-                delay(300);
+                //DMESG("OPTCR2: %p", FLASH_OPTCR);
+                //delay(300);
 
                 flash_unlock();
 
@@ -90,9 +99,9 @@ void warning_screen() {
                 flash_program_word(APP_LOAD_ADDRESS, 0);
                 flash_program_word(APP_LOAD_ADDRESS + 4, 0);
                 
-                DMESG("cleared: %p", *(int*)APP_LOAD_ADDRESS);
-                delay(300);
-                DMESG("done");
+                //DMESG("cleared: %p", *(int*)APP_LOAD_ADDRESS);
+                //delay(300);
+                //DMESG("done");
 
                 // exit to bootloader
                 return;

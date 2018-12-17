@@ -203,7 +203,7 @@ board_get_rtc_signature()
 	return result;
 }
 
-static void
+void
 board_set_rtc_signature(uint32_t sig)
 {
 	/* enable the backup registers */
@@ -522,7 +522,7 @@ led_off(unsigned led)
 void flash_bootloader(void);
 int hf2_mode = 0;
 
-void warning_screen();
+void warning_screen(uint32_t);
 
 int
 main(void)
@@ -558,11 +558,11 @@ main(void)
 
 	#else
 
-	if (FLASH_OPTCR & 0x80030000) {
-		warning_screen();
-	}
-
 	uint32_t bootSig = board_get_rtc_signature();
+
+	if (FLASH_OPTCR & 0x80030000) {
+		warning_screen(bootSig);
+	}
 
 	DMESG("bootsig: %p", bootSig);
 

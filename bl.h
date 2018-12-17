@@ -161,3 +161,5 @@ void print4(int x, int y, int col, const char *text);
 void drawBar(int y, int h, int c);
 
 void start_systick();
+
+void board_set_rtc_signature(uint32_t sig);
