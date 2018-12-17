@@ -273,69 +273,6 @@ board_test_force_pin()
 	return false;
 }
 
-#if INTERFACE_USART
-static bool
-board_test_usart_receiving_break()
-{
-#if !defined(SERIAL_BREAK_DETECT_DISABLED)
-	/* (re)start the SysTick timer system */
-	systick_interrupt_disable(); // Kill the interrupt if it is still active
-	systick_counter_disable(); // Stop the timer
-	systick_set_clocksource(STK_CSR_CLKSOURCE_AHB);
-
-	/* Set the timer period to be half the bit rate
-	 *
-	 * Baud rate = 115200, therefore bit period = 8.68us
-	 * Half the bit rate = 4.34us
-	 * Set period to 4.34 microseconds (timer_period = timer_tick / timer_reset_frequency = 168MHz / (1/4.34us) = 729.12 ~= 729)
-	 */
-	systick_set_reload(((board_info.systick_mhz * 1000000) / USART_BAUDRATE) >> 1);
-	systick_counter_enable(); // Start the timer
-
-	uint8_t cnt_consecutive_low = 0;
-	uint8_t cnt = 0;
-
-	/* Loop for 3 transmission byte cycles and count the low and high bits. Sampled at a rate to be able to count each bit twice.
-	 *
-	 * One transmission byte is 10 bits (8 bytes of data + 1 start bit + 1 stop bit)
-	 * We sample at every half bit time, therefore 20 samples per transmission byte,
-	 * therefore 60 samples for 3 transmission bytes
-	 */
-	while (cnt < 60) {
-		// Only read pin when SysTick timer is true
-		if (systick_get_countflag() == 1) {
-			if (gpio_get(BOARD_PORT_USART, BOARD_PIN_RX) == 0) {
-				cnt_consecutive_low++;	// Increment the consecutive low counter
-
-			} else {
-				cnt_consecutive_low = 0; // Reset the consecutive low counter
-			}
-
-			cnt++;
-		}
-
-		// If 9 consecutive low bits were received break out of the loop
-		if (cnt_consecutive_low >= 18) {
-			break;
-		}
-
-	}
-
-	systick_counter_disable(); // Stop the timer
-
-	/*
-	 * If a break is detected, return true, else false
-	 *
-	 * Break is detected if line was low for 9 consecutive bits.
-	 */
-	if (cnt_consecutive_low >= 18) {
-		return true;
-	}
-#endif // !defined(SERIAL_BREAK_DETECT_DISABLED)
-
-	return false;
-}
-#endif
 
 static void
 board_init(void)
@@ -349,7 +286,7 @@ board_init(void)
 	RCC_AHB1ENR |= RCC_AHB1ENR_IOPAEN|RCC_AHB1ENR_IOPBEN|RCC_AHB1ENR_IOPCEN|BOARD_CLOCK_VBUS;
 
 	// make sure JACDAC line is up, otherwise trashes the bus
-	setup_pin(CFG_PIN_JACK_TX, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP);
+	setup_input_pin(CFG_PIN_JACK_TX);
 
 	setup_output_pin(CFG_PIN_LED);
 	setup_output_pin(CFG_PIN_LED1);
@@ -585,6 +522,8 @@ led_off(unsigned led)
 void flash_bootloader(void);
 int hf2_mode = 0;
 
+void warning_screen();
+
 int
 main(void)
 {
@@ -619,10 +558,13 @@ main(void)
 
 	#else
 
+	if (FLASH_OPTCR & 0x80030000) {
+		warning_screen();
+	}
+
 	uint32_t bootSig = board_get_rtc_signature();
 
 	DMESG("bootsig: %p", bootSig);
-
 
 	/*
 	* Clear the signature so that if someone resets us while we're

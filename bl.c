@@ -230,13 +230,17 @@ void usb_enumerated() {
 
 int screen_on;
 
-void bootloader(unsigned timeout) {
+void start_systick() {
     /* (re)start the timer system */
     systick_set_clocksource(STK_CSR_CLKSOURCE_AHB);
     systick_set_reload(board_info.systick_mhz * 1000); /* 1ms tick, magic number */
     systick_interrupt_enable();
     systick_counter_enable();
+}
 
+void bootloader(unsigned timeout) {
+    start_systick();
+    
     /* if we are working with a timeout, start it running */
     if (timeout) {
         timer[TIMER_BL_WAIT] = timeout;

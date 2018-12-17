@@ -8,7 +8,6 @@
 #include "settings.h"
 #include "bl.h"
 
-
 void panic() {
     for (;;)
         ;
@@ -42,6 +41,10 @@ void setup_output_pin(int pincfg) {
     setup_pin(pincfg, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE);
 }
 
+void setup_input_pin(int pincfg) {
+    setup_pin(pincfg, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP);
+}
+
 void pin_set(int pincfg, int v) {
     int pin = lookupCfg(pincfg, -1);
     if (pin < 0)
@@ -53,7 +56,12 @@ void pin_set(int pincfg, int v) {
     }
 }
 
-
+int pin_get(int pincfg) {
+    int pin = lookupCfg(pincfg, -1);
+    if (pin < 0)
+        return 1;
+    return gpio_get(pinport(pin), pinmask(pin)) != 0;
+}
 
 uint32_t lookupCfg(uint32_t key, uint32_t defl) {
     const uint32_t *ptr = BOOT_SETTINGS->configValues;

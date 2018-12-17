@@ -140,8 +140,10 @@ void flash_write(uint32_t dst, const uint8_t *src, int len);
 #define VALID_FLASH_ADDR(addr, sz) (USER_FLASH_START <= (addr) && (addr) + (sz) <= USER_FLASH_END)
 
 void setup_output_pin(int pincfg);
+void setup_input_pin(int pincfg);
 void setup_pin(int pincfg, int mode, int pull);
 void pin_set(int pincfg, int v);
+int pin_get(int pincfg);
 
 uint32_t pinport(int pin);
 static inline uint16_t pinmask(int pin) {
@@ -156,3 +158,6 @@ void draw_hf2();
 void print(int x, int y, int col, const char *text);
 void draw_screen();
 void print4(int x, int y, int col, const char *text);
+void drawBar(int y, int h, int c);
+
+void start_systick();
