@@ -30,9 +30,9 @@ for (let line of fs.readFileSync(process.argv[2], "utf8").split(/\r?\n/)) {
   name = name.replace(/.*\/lib/, "lib")
     .replace("CMakeFiles/CIRCUIT_PLAYGROUND.dir/", "")
 
-    // .replace(/\(.*/, "") // can remove
-    .replace(/pxtapp\/.*/, "pxtapp")
-    .replace(/libcodal-.*/, "codal")
+    //.replace(/\(.*/, "") // can remove
+    //.replace(/pxtapp\/.*/, "pxtapp")
+    //.replace(/libcodal-.*/, "codal")
 
   let pref = inram ? "RAM." : ""
 

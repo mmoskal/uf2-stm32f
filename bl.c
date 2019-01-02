@@ -79,34 +79,46 @@ static void do_jump(uint32_t stacktop, uint32_t entrypoint) {
         ;
 }
 
-void jump_to_app() {
-    const uint32_t *app_base = (const uint32_t *)APP_LOAD_ADDRESS;
+static uint32_t checked_app_addr(uint32_t app_addr) {
+    const uint32_t *app_base = (const uint32_t *)app_addr;
 
     /*
      * We refuse to program the first word of the app until the upload is marked
      * complete by the host.  So if it's not 0xffffffff, we should try booting it.
      */
     if (app_base[0] == 0xffffffff) {
-        return;
+        return 0;
     }
 
     // first word is stack base - needs to be in RAM region and word-aligned
     if ((app_base[0] & 0xff000003) != 0x20000000) {
-        return;
+        return 0;
     }
 
     /*
      * The second word of the app is the entrypoint; it must point within the
      * flash area (or we have a bad flash).
      */
-    if (app_base[1] < APP_LOAD_ADDRESS) {
-        return;
+    if (app_base[1] < app_addr) {
+        return 0;
     }
 
-    if (app_base[1] >= (APP_LOAD_ADDRESS + board_info.fw_size)) {
-        return;
+    if (app_base[1] >= (app_addr + board_info.fw_size)) {
+        return 0;
     }
 
+    return app_addr;
+}
+
+void jump_to_app() {
+    uint32_t app_addr = checked_app_addr(APP_LOAD_ADDRESS2);
+
+    if (!app_addr)
+        app_addr = checked_app_addr(APP_LOAD_ADDRESS);
+    
+    if (!app_addr)
+        return;
+    
     /* just for paranoia's sake */
     flash_lock();
 
@@ -124,7 +136,9 @@ void jump_to_app() {
     board_deinit();
 
     /* switch exception handlers to the application */
-    SCB_VTOR = APP_LOAD_ADDRESS;
+    SCB_VTOR = app_addr;
+
+    const uint32_t *app_base = (const uint32_t *)app_addr;
 
     /* extract the stack and entrypoint from the app vector table and go */
     do_jump(app_base[0], app_base[1]);
