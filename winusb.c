@@ -21,6 +21,44 @@
 
 //#include "usb_conf.h"
 
+#define WINUSB_SIZE 170
+
+static const uint8_t msOS20Descriptor[] = {
+    // Microsoft OS 2.0 descriptor set header (table 10)
+    0x0A, 0x00,             // Descriptor size (10 bytes)
+    0x00, 0x00,             // MS OS 2.0 descriptor set header
+    0x00, 0x00, 0x03, 0x06, // Windows version (8.1) (0x06030000)
+    WINUSB_SIZE, 0x00,      // Size, MS OS 2.0 descriptor set
+
+    // Microsoft OS 2.0 function subset header
+    0x08, 0x00,             // Descriptor size (8 bytes)
+    0x02, 0x00,             // MS OS 2.0 function subset header
+    0x01,                   // first interface no; msOS20Descriptor[14]
+    0x00,                   // Reserved
+    WINUSB_SIZE - 10, 0x00, // Size, MS OS 2.0 function subset
+
+    // Microsoft OS 2.0 compatible ID descriptor (table 13)
+    20, 0x00,                     // wLength
+    0x03, 0x00,                   // MS_OS_20_FEATURE_COMPATIBLE_ID
+    'W', 'I', 'N', 'U', 'S', 'B', //
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+
+    // interface guids
+    132, 0, 4, 0, 7, 0,
+    //
+    42, 0,
+    //
+    'D', 0, 'e', 0, 'v', 0, 'i', 0, 'c', 0, 'e', 0, 'I', 0, 'n', 0, 't', 0, 'e', 0, 'r', 0, 'f', 0,
+    'a', 0, 'c', 0, 'e', 0, 'G', 0, 'U', 0, 'I', 0, 'D', 0, 's', 0, 0, 0,
+    //
+    80, 0,
+    //
+    '{', 0, '9', 0, '2', 0, 'C', 0, 'E', 0, '6', 0, '4', 0, '6', 0, '2', 0, '-', 0, '9', 0, 'C', 0,
+    '7', 0, '7', 0, '-', 0, '4', 0, '6', 0, 'F', 0, 'E', 0, '-', 0, '9', 0, '3', 0, '3', 0, 'B', 0,
+    '-', 0, '3', 0, '1', 0, 'C', 0, 'B', 0, '9', 0, 'C', 0, '5', 0, 'A', 0, 'A', 0, '3', 0, 'B', 0,
+    'B', 0, '}', 0, 0, 0, 0, 0};
+
+
 const struct winusb_platform_descriptor winusb_cap = {
     .bLength = sizeof(struct winusb_platform_descriptor),
     .bDescriptorType = USB_DT_DEVICE_CAPABILITY,
@@ -29,28 +67,10 @@ const struct winusb_platform_descriptor winusb_cap = {
     .platformCapabilityUUID = WINUSB_OS_20_UUID,
     .descriptor_set_information = { {
         .dwWindowsVersion = 0x06030000,
-        .wMSOSDescriptorSetTotalLength = 0xAA,
+        .wMSOSDescriptorSetTotalLength = WINUSB_SIZE,
         .bMS_VendorCode = WINUSB_MS_VENDOR_CODE,
         .bAltEnumCode = 0x00,
     } }
-};
-
-static const struct winusb_compatible_id_descriptor winusb_wcid = {
-    .dwLength = (WINUSB_COMPATIBLE_ID_HEADER_SIZE +
-                 1*WINUSB_COMPATIBLE_ID_FUNCTION_SECTION_SIZE),
-    .bcdVersion = 0x0100,
-    .wIndex = 0x0004,
-    .bNumSections = 1,
-    .reserved = { 0, 0, 0, 0, 0, 0, 0 },
-    .functions = {
-        {
-            .bInterfaceNumber = 0,
-            .reserved0 = { 1 },
-            .compatibleId = "WINUSB",
-            .subCompatibleId = "",
-            .reserved1 = { 0, 0, 0, 0, 0, 0}
-        },
-    }
 };
 
 static int winusb_control_vendor_request(usbd_device *usbd_dev,
@@ -66,10 +86,10 @@ static int winusb_control_vendor_request(usbd_device *usbd_dev,
 
     int status = USBD_REQ_NOTSUPP;
     if (((req->bmRequestType & USB_REQ_TYPE_RECIPIENT) == USB_REQ_TYPE_DEVICE) &&
-        (req->wIndex == WINUSB_REQ_GET_COMPATIBLE_ID_FEATURE_DESCRIPTOR)) {
-        *buf = (uint8_t*)(&winusb_wcid);
-        if (*len > winusb_wcid.dwLength) {
-            *len = winusb_wcid.dwLength;
+        (req->wIndex == 0x07)) {
+        *buf = (uint8_t*)msOS20Descriptor;
+        if (*len > WINUSB_SIZE) {
+            *len = WINUSB_SIZE;
         }
         status = USBD_REQ_HANDLED;
     } else if (((req->bmRequestType & USB_REQ_TYPE_RECIPIENT) == USB_REQ_TYPE_INTERFACE) &&
