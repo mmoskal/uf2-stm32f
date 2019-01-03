@@ -21,6 +21,20 @@
 
 //#include "usb_conf.h"
 
+const struct winusb_platform_descriptor winusb_cap = {
+    .bLength = sizeof(struct winusb_platform_descriptor),
+    .bDescriptorType = USB_DT_DEVICE_CAPABILITY,
+    .bDevCapabilityType = USB_DC_PLATFORM,
+    .bReserved = 0,
+    .platformCapabilityUUID = WINUSB_OS_20_UUID,
+    .descriptor_set_information = { {
+        .dwWindowsVersion = 0x06030000,
+        .wMSOSDescriptorSetTotalLength = 0xAA,
+        .bMS_VendorCode = WINUSB_MS_VENDOR_CODE,
+        .bAltEnumCode = 0x00,
+    } }
+};
+
 static const struct winusb_compatible_id_descriptor winusb_wcid = {
     .dwLength = (WINUSB_COMPATIBLE_ID_HEADER_SIZE +
                  1*WINUSB_COMPATIBLE_ID_FUNCTION_SECTION_SIZE),

@@ -84,7 +84,7 @@ struct winusb_platform_descriptor {
     uint8_t bDevCapabilityType;
     uint8_t bReserved;
     uint8_t platformCapabilityUUID[16];
-    struct winusb_descriptor_set_information descriptor_set_information[];
+    struct winusb_descriptor_set_information descriptor_set_information[1];
 } __attribute__((packed));
 
 /* Table 10. Microsoft OS 2.0 descriptor set header */

@@ -166,9 +166,12 @@ static const struct usb_interface ifaces[] = {
     },    
 };
 
+extern const struct winusb_platform_descriptor winusb_cap;
+
 // WEBUSB It seems the MS capability thingy is missing here
 static const struct usb_device_capability_descriptor* capabilities[] = {
     (const struct usb_device_capability_descriptor*)&webusb_platform,
+    (const struct usb_device_capability_descriptor*)&winusb_cap,
 };
 
 static const struct usb_bos_descriptor bos = {
