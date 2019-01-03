@@ -12,3 +12,4 @@ Bootloader.sublime-workspace
 .gdbinit
 .vscode
 build
+tmp
