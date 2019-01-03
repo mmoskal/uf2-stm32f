@@ -63,8 +63,11 @@ int pin_get(int pincfg) {
     return gpio_get(pinport(pin), pinmask(pin)) != 0;
 }
 
+extern const uint32_t configData[];
 uint32_t lookupCfg(uint32_t key, uint32_t defl) {
     const uint32_t *ptr = BOOT_SETTINGS->configValues;
+    if (BOOT_SETTINGS->magic0 != SETTINGS_MAGIC_0)
+        ptr = configData + 2;
     while (*ptr) {
         if (*ptr == key)
             return ptr[1];

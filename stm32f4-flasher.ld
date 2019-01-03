@@ -53,6 +53,7 @@ SECTIONS
                 *(.text*)       /* Program code */
                 . = ALIGN(4);
                 *(.rodata*)     /* Read-only data */
+                KEEP (*(.config))
                 . = ALIGN(4);
                 _etext = .;
         } >rom

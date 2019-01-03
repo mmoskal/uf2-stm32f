@@ -312,7 +312,10 @@ board_deinit(void)
 static inline void
 clock_init(void)
 {
-	clock_setup.pllm = BOOT_SETTINGS->hseValue / 1000000;
+	uint32_t pllm = BOOT_SETTINGS->hseValue / 1000000;
+	if (pllm < 4 || pllm > 60 || pllm * 1000000 != BOOT_SETTINGS->hseValue)
+		pllm = OSC_FREQ;
+	clock_setup.pllm = pllm;
 	rcc_clock_setup_hse_3v3(&clock_setup);
 }
 
