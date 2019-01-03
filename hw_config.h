@@ -967,7 +967,7 @@
 #endif
 # define OSC_FREQ                       8
 #endif
-# define USBPRODUCTID                   0x1042
+# define USBPRODUCTID                   0x1043
 
 # define BOARD_TYPE                     1042
 # define BOARD_FLASH_SECTORS            8
