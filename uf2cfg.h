@@ -1,5 +1,5 @@
-#define UF2_VERSION "2.2.0"
-#define BOARD_ID "STM32F401-BPA1A-v0"
+#define UF2_VERSION "2.3.0"
+#define BOARD_ID "STM32F401-BrainPad-Arcade-RevA"
 #define INDEX_URL "https://arcade.makecode.com"
 #define UF2_NUM_BLOCKS 8000
 #define VOLUME_LABEL "ARCD-F401"
