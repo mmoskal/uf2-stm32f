@@ -2,24 +2,37 @@
 # Common Makefile for the PX4 bootloaders
 #
 
+-include Makefile.user
+
 #
 # Paths to common dependencies
 #
 export BL_BASE		?= $(wildcard .)
 export LIBOPENCM3	?= $(wildcard libopencm3)
-MKFLAGS=--no-print-directory
+
 #
 # Tools
 #
-export CC	 	 = arm-none-eabi-gcc
-export OBJCOPY		 = arm-none-eabi-objcopy
+export CC	    ?= arm-none-eabi-gcc
+export OBJCOPY	?= arm-none-eabi-objcopy
+export OPENOCD	?= openocd
+
+JTAGCONFIG ?= interface/stlink-v2.cfg
 
 export BOARD ?= brainpad_arcade
-
-export LINKER_FILE ?= stm32f4.ld 
-export EXTRAFLAGS ?= -DSTM32F401
-export SPECMAKEFILE ?= Makefile.f4
 -include boards/$(BOARD)/board.mk
+
+# Default to F401; override in board.mk if needed
+FN ?= f4
+CPUTYPE ?= STM32F401
+CPUTYPE_SHORT ?= STM32F4
+CPUFLAGS ?= -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16
+# f1: -mcpu=cortex-m3
+# f3: as f4
+# f7: -mcpu=cortex-m7 -mfloat-abi=hard -mfpu=fpv5-sp-d16
+
+LINKER_FILE ?= stm32$(FN).ld 
+EXTRAFLAGS ?= -D$(CPUTYPE)
 
 #
 # Common configuration
@@ -42,6 +55,21 @@ export FLAGS		 = -std=gnu99 \
 
 export COMMON_SRCS	 = bl.c usb.c usb_msc.c ghostfat.c dmesg.c screen.c images.c settings.c hf2.c support.c webusb.c winusb.c util.c flashwarning.c
 
+
+SRCS		 = $(COMMON_SRCS) main_$(FN).c
+
+OBJS		:= $(patsubst %.c,%.o,$(SRCS))
+DEPS		:= $(OBJS:.o=.d)
+
+
+FLAGS		+= -mthumb $(CPUFLAGS) \
+       -D$(CPUTYPE_SHORT) \
+       -T$(LINKER_FILE) \
+		   -L$(LIBOPENCM3)/lib \
+		   -lopencm3_stm32$(FN) \
+        $(EXTRAFLAGS)
+
+
 #
 # Bootloaders to build
 #
@@ -59,8 +87,22 @@ clean:
 # any file generated during libopencm3 build
 OCM3FILE = libopencm3/include/libopencm3/stm32/f4/nvic.h
 
-build: $(MAKEFILE_LIST) $(OCM3FILE)
-	${MAKE} ${MKFLAGS} -f $(SPECMAKEFILE) TARGET_FILE_NAME=$(BOARD)
+build: $(MAKEFILE_LIST) $(OCM3FILE) do-build
+
+#
+# General rules for making dependency and object files
+# This is where the compiler is called
+#
+include rules.mk
+
+upload: build flash-bootloader
+
+flash-bootloader:
+	$(OPENOCD) -f $(JTAGCONFIG) -f ocd/stm32$(FN)x.cfg \
+                -c "program build/$(BOARD)/bootloader.elf verify reset exit "
+
+gdb:
+	arm-none-eabi-gdb --eval "target remote | $(OPENOCD) -f $(JTAGCONFIG) -f ocd/stm32$(FN)x.cfg -f ocd/debug.cfg" build/$(BOARD)/bootloader.elf
 
 #
 # Show sizes

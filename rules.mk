@@ -13,7 +13,7 @@ UF2		 = $(BUILD_DIR)/flasher.uf2
 
 FL_OBJS = $(addprefix $(BUILD_DIR)/, flasher.o main_f4-flasher.o util.o dmesg.o screen.o images.o settings.o)
 
-all:		$(BUILD_DIR) $(ELF) $(BINARY) $(UF2)
+do-build:		$(BUILD_DIR) $(ELF) $(BINARY) $(UF2)
 
 # Compile and generate dependency files
 $(BUILD_DIR)/%.o:	%.c
