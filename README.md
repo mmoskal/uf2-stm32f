@@ -4,20 +4,14 @@ This implements USB mass storage flashing using [UF2 format](https://github.com/
 
 ## Build instructions
 
-To build for the first time, run in this folder:
-
-```bash
-git submodule update --init
-cd libopencm3
-make
-cd ..
-make
-```
+To build just run ``make`` in this folder.
+This will fetch git submodules if needed and build libopenocm3
+(which only happens once).
 
 The binaries will be in `build/BOARDNAME`. 
 The following files will be built:
-* `BOARDNAME.elf` - for use with JTAG adapters
-* `BOARDNAME.bin` - for direct onboard upgrading
+* `bootloader.elf` - for use with JTAG adapters
+* `bootloader.bin` - for direct onboard upgrading
 * `flasher.uf2` - if you already have a UF2 bootloader, you can just drop this on board and it will update the bootloader
 * `flasher16.uf2` - this is similar, but if you have an older UF2 bootloader on the board, that expects the app to start at 16k (`0x08004000`)
 

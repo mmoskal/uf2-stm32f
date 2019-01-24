@@ -130,8 +130,6 @@ typedef struct mcu_rev_t {
 	char  rev;
 } mcu_rev_t;
 
-#define APP_SIZE_MAX			(BOARD_FLASH_SIZE - (BOOTLOADER_RESERVATION_SIZE + APP_RESERVATION_SIZE))
-
 /* context passed to cinit */
 #if INTERFACE_USB
 # define BOARD_INTERFACE_CONFIG_USB  	NULL
@@ -139,9 +137,7 @@ typedef struct mcu_rev_t {
 
 /* board definition */
 struct boardinfo board_info = {
-	.board_type	= BOARD_TYPE,
 	.board_rev	= 0,
-	.fw_size	= 0,
 
 #ifdef STM32F401
 	.systick_mhz	= 84,
@@ -277,9 +273,6 @@ board_test_force_pin()
 static void
 board_init(void)
 {
-	/* fix up the max firmware size, we have to read memory to get this */
-	board_info.fw_size = APP_SIZE_MAX;
-
 	RCC_APB1ENR |= RCC_APB1ENR_PWREN;
 	
 	// enable all GPIO clocks

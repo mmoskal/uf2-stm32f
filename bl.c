@@ -103,7 +103,7 @@ void jump_to_app() {
         return;
     }
 
-    if (app_base[1] >= (APP_LOAD_ADDRESS + board_info.fw_size)) {
+    if (app_base[1] >= (APP_LOAD_ADDRESS + BOARD_FLASH_SIZE)) {
         return;
     }
 

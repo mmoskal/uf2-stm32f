@@ -14,6 +14,13 @@ MKFLAGS=--no-print-directory
 export CC	 	 = arm-none-eabi-gcc
 export OBJCOPY		 = arm-none-eabi-objcopy
 
+export BOARD ?= brainpad_arcade
+
+export LINKER_FILE ?= stm32f4.ld 
+export EXTRAFLAGS ?= -DSTM32F401
+export SPECMAKEFILE ?= Makefile.f4
+-include boards/$(BOARD)/board.mk
+
 #
 # Common configuration
 #
@@ -24,6 +31,7 @@ export FLAGS		 = -std=gnu99 \
 			   -Wall \
 			   -fno-builtin \
 			   -I$(LIBOPENCM3)/include \
+			   -Iboards/$(BOARD) \
 			   -ffunction-sections \
 			   -nostartfiles \
 			   -lnosys \
@@ -37,113 +45,22 @@ export COMMON_SRCS	 = bl.c usb.c usb_msc.c ghostfat.c dmesg.c screen.c images.c 
 #
 # Bootloaders to build
 #
-TARGETS	= \
-	aerofcv1_bl \
-	auavx2v1_bl \
-	crazyflie_bl \
-	mindpxv2_bl \
-	omnibusf4sd_bl \
-	px4aerocore_bl \
-	px4discovery_bl \
-	px4flow_bl \
-	px4fmu_bl \
-	px4fmuv2_bl \
-	px4fmuv3_bl \
-	px4fmuv4_bl \
-	px4fmuv4pro_bl \
-	px4fmuv5_bl \
-	px4io_bl \
-	px4iov3_bl \
-	tapv1_bl \
-	cube_f4_bl \
-	cube_f7_bl \
-	brainpad_bl
 
 #TARGETS	= brainpad_bl braingames_bl braingames_revb_bl
 TARGETS	= braingames_revb_bl
 
-all:	$(TARGETS) sizes
+all:	build sizes
 
 clean:
 	cd libopencm3 && make --no-print-directory clean && cd ..
 	rm -f *.elf *.bin # Remove any elf or bin files contained directly in the Bootloader directory
 	rm -rf build # Remove build directories
 
-#
-# Specific bootloader targets.
-#
+# any file generated during libopencm3 build
+OCM3FILE = libopencm3/include/libopencm3/stm32/f4/nvic.h
 
-auavx2v1_bl: $(MAKEFILE_LIST) $(LIBOPENCM3)
-	${MAKE} ${MKFLAGS} -f  Makefile.f4 TARGET_HW=AUAV_X2V1  LINKER_FILE=stm32f4.ld TARGET_FILE_NAME=$@
-
-px4fmu_bl: $(MAKEFILE_LIST) $(LIBOPENCM3)
-	${MAKE} ${MKFLAGS} -f  Makefile.f4 TARGET_HW=PX4_FMU_V1 LINKER_FILE=stm32f4.ld TARGET_FILE_NAME=$@
-
-px4fmuv2_bl: $(MAKEFILE_LIST) $(LIBOPENCM3)
-	${MAKE} ${MKFLAGS} -f  Makefile.f4 TARGET_HW=PX4_FMU_V2  LINKER_FILE=stm32f4.ld TARGET_FILE_NAME=$@
-
-px4fmuv3_bl: $(MAKEFILE_LIST) $(LIBOPENCM3)
-	${MAKE} ${MKFLAGS} -f  Makefile.f4 TARGET_HW=PX4_FMU_V3  LINKER_FILE=stm32f4.ld TARGET_FILE_NAME=$@
-
-px4fmuv4_bl: $(MAKEFILE_LIST) $(LIBOPENCM3)
-	${MAKE} ${MKFLAGS} -f  Makefile.f4 TARGET_HW=PX4_FMU_V4  LINKER_FILE=stm32f4.ld TARGET_FILE_NAME=$@
-
-px4fmuv4pro_bl:$(MAKEFILE_LIST) $(LIBOPENCM3)
-	${MAKE} ${MKFLAGS} -f  Makefile.f4 TARGET_HW=PX4_FMU_V4_PRO LINKER_FILE=stm32f4.ld TARGET_FILE_NAME=$@ EXTRAFLAGS=-DSTM32F469
-
-px4fmuv5_bl:$(MAKEFILE_LIST) $(LIBOPENCM3)
-	${MAKE} ${MKFLAGS} -f  Makefile.f7 TARGET_HW=PX4_FMU_V5 LINKER_FILE=stm32f7.ld TARGET_FILE_NAME=$@
-
-mindpxv2_bl: $(MAKEFILE_LIST) $(LIBOPENCM3)
-	${MAKE} ${MKFLAGS} -f  Makefile.f4 TARGET_HW=MINDPX_V2 LINKER_FILE=stm32f4.ld TARGET_FILE_NAME=$@
-
-px4discovery_bl: $(MAKEFILE_LIST) $(LIBOPENCM3)
-	${MAKE} ${MKFLAGS} -f  Makefile.f4 TARGET_HW=PX4_DISCOVERY_V1  LINKER_FILE=stm32f4.ld TARGET_FILE_NAME=$@
-
-px4flow_bl: $(MAKEFILE_LIST) $(LIBOPENCM3)
-	${MAKE} ${MKFLAGS} -f  Makefile.f4 TARGET_HW=PX4_FLOW_V1  LINKER_FILE=stm32f4.ld TARGET_FILE_NAME=$@
-
-px4aerocore_bl: $(MAKEFILE_LIST) $(LIBOPENCM3)
-	${MAKE} ${MKFLAGS} -f  Makefile.f4 TARGET_HW=PX4_AEROCORE_V1 LINKER_FILE=stm32f4.ld TARGET_FILE_NAME=$@
-
-crazyflie_bl: $(MAKEFILE_LIST) $(LIBOPENCM3)
-	${MAKE} ${MKFLAGS} -f  Makefile.f4 TARGET_HW=CRAZYFLIE LINKER_FILE=stm32f4.ld TARGET_FILE_NAME=$@
-
-omnibusf4sd_bl: $(MAKEFILE_LIST) $(LIBOPENCM3)
-	${MAKE} ${MKFLAGS} -f  Makefile.f4 TARGET_HW=OMNIBUSF4SD LINKER_FILE=stm32f4.ld TARGET_FILE_NAME=$@
-
-cube_f4_bl: $(MAKEFILE_LIST) $(LIBOPENCM3)
-	${MAKE} ${MKFLAGS} -f  Makefile.f4 TARGET_HW=CUBE_F4  LINKER_FILE=stm32f4.ld TARGET_FILE_NAME=$@
-
-cube_f7_bl:$(MAKEFILE_LIST) $(LIBOPENCM3)
-	${MAKE} ${MKFLAGS} -f  Makefile.f7 TARGET_HW=CUBE_F7 LINKER_FILE=stm32f7.ld TARGET_FILE_NAME=$@
-
-# Default bootloader delay is *very* short, just long enough to catch
-# the board for recovery but not so long as to make restarting after a
-# brownout problematic.
-#
-px4io_bl: $(MAKEFILE_LIST) $(LIBOPENCM3)
-	${MAKE} ${MKFLAGS} -f  Makefile.f1 TARGET_HW=PX4_PIO_V1 LINKER_FILE=stm32f1.ld TARGET_FILE_NAME=$@
-
-px4iov3_bl: $(MAKEFILE_LIST) $(LIBOPENCM3)
-	${MAKE} ${MKFLAGS} -f  Makefile.f3 TARGET_HW=PX4_PIO_V3 LINKER_FILE=stm32f3.ld TARGET_FILE_NAME=$@
-
-tapv1_bl: $(MAKEFILE_LIST) $(LIBOPENCM3)
-	${MAKE} ${MKFLAGS} -f  Makefile.f4 TARGET_HW=TAP_V1 LINKER_FILE=stm32f4.ld TARGET_FILE_NAME=$@
-
-aerofcv1_bl: $(MAKEFILE_LIST) $(LIBOPENCM3)
-	${MAKE} ${MKFLAGS} -f  Makefile.f4 TARGET_HW=AEROFC_V1 LINKER_FILE=stm32f4.ld TARGET_FILE_NAME=$@
-
-brainpad_bl:$(MAKEFILE_LIST) $(LIBOPENCM3)
-	${MAKE} ${MKFLAGS} -f  Makefile.f4 TARGET_HW=BRAINPAD LINKER_FILE=stm32f4.ld TARGET_FILE_NAME=$@ EXTRAFLAGS=-DSTM32F401
-
-braingames_bl:$(MAKEFILE_LIST) $(LIBOPENCM3)
-	${MAKE} ${MKFLAGS} -f  Makefile.f4 TARGET_HW=BRAINGAMES LINKER_FILE=stm32f4.ld TARGET_FILE_NAME=$@ EXTRAFLAGS=-DSTM32F401
-
-#braingames_revb_bl:$(MAKEFILE_LIST) $(LIBOPENCM3)
-braingames_revb_bl:$(MAKEFILE_LIST)
-	${MAKE} ${MKFLAGS} -f  Makefile.f4 TARGET_HW=BRAINGAMES_REVB LINKER_FILE=stm32f4.ld TARGET_FILE_NAME=$@ EXTRAFLAGS=-DSTM32F401
-
+build: $(MAKEFILE_LIST) $(OCM3FILE)
+	${MAKE} ${MKFLAGS} -f $(SPECMAKEFILE) TARGET_FILE_NAME=$(BOARD)
 
 #
 # Show sizes
@@ -163,8 +80,9 @@ deploy:
 # Submodule management
 #
 
-$(LIBOPENCM3): checksubmodules
-	${MAKE} -C $(LIBOPENCM3) lib
+$(OCM3FILE): 
+	${MAKE} checksubmodules
+	${MAKE} -C $(LIBOPENCM3) -j10 lib
 
 .PHONY: checksubmodules
 checksubmodules: updatesubmodules

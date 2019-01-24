@@ -7,9 +7,9 @@ BUILD_DIR	 = build/$(TARGET_FILE_NAME)
 OBJS		:= $(addprefix $(BUILD_DIR)/, $(patsubst %.c,%.o,$(SRCS)))
 DEPS		:= $(OBJS:.o=.d)
 
-ELF		 = $(BUILD_DIR)/$(TARGET_FILE_NAME).elf
-BINARY		 = $(BUILD_DIR)/$(TARGET_FILE_NAME).bin
-UF2		 = $(BUILD_DIR)/$(TARGET_FILE_NAME).uf2
+ELF		 = $(BUILD_DIR)/bootloader.elf
+BINARY		 = $(BUILD_DIR)/bootloader.bin
+UF2		 = $(BUILD_DIR)/flasher.uf2
 
 FL_OBJS = $(addprefix $(BUILD_DIR)/, flasher.o main_f4-flasher.o util.o dmesg.o screen.o images.o settings.o)
 

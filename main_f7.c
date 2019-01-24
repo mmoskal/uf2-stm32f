@@ -108,8 +108,6 @@ const mcu_rev_t silicon_revs[] = {
 	{MCU_REV_STM32F7_REV_Z, 'Z'}, /* Revision Z */
 };
 
-#define APP_SIZE_MAX			(BOARD_FLASH_SIZE - (BOOTLOADER_RESERVATION_SIZE + APP_RESERVATION_SIZE))
-
 /* context passed to cinit */
 #if INTERFACE_USART
 # define BOARD_INTERFACE_CONFIG_USART	(void *)BOARD_USART
@@ -120,10 +118,7 @@ const mcu_rev_t silicon_revs[] = {
 
 /* board definition */
 struct boardinfo board_info = {
-	.board_type	= BOARD_TYPE,
 	.board_rev	= 0,
-	.fw_size	= 0,
-
 	.systick_mhz	= 168,
 };
 
@@ -302,9 +297,6 @@ board_test_usart_receiving_break()
 static void
 board_init(void)
 {
-	/* fix up the max firmware size, we have to read memory to get this */
-	board_info.fw_size = APP_SIZE_MAX;
-
 #if defined(BOARD_POWER_PIN_OUT)
 	/* Configure the Power pins */
 	rcc_peripheral_enable_clock(&BOARD_POWER_CLOCK_REGISTER, BOARD_POWER_CLOCK_BIT);
