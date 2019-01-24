@@ -13,8 +13,8 @@ export LIBOPENCM3	?= $(wildcard libopencm3)
 #
 # Tools
 #
-export CC	    ?= arm-none-eabi-gcc
-export OBJCOPY	?= arm-none-eabi-objcopy
+export CC	    = arm-none-eabi-gcc
+export OBJCOPY	= arm-none-eabi-objcopy
 export OPENOCD	?= openocd
 
 JTAGCONFIG ?= interface/stlink-v2.cfg
@@ -31,7 +31,7 @@ CPUFLAGS ?= -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16
 # f3: as f4
 # f7: -mcpu=cortex-m7 -mfloat-abi=hard -mfpu=fpv5-sp-d16
 
-LINKER_FILE ?= stm32$(FN).ld 
+LINKER_FILE ?= linker/stm32$(FN).ld 
 EXTRAFLAGS ?= -D$(CPUTYPE)
 
 #
@@ -65,8 +65,8 @@ DEPS		:= $(OBJS:.o=.d)
 FLAGS		+= -mthumb $(CPUFLAGS) \
        -D$(CPUTYPE_SHORT) \
        -T$(LINKER_FILE) \
-		   -L$(LIBOPENCM3)/lib \
-		   -lopencm3_stm32$(FN) \
+	   -L$(LIBOPENCM3)/lib \
+	   -lopencm3_stm32$(FN) \
         $(EXTRAFLAGS)
 
 
@@ -74,10 +74,7 @@ FLAGS		+= -mthumb $(CPUFLAGS) \
 # Bootloaders to build
 #
 
-#TARGETS	= brainpad_bl braingames_bl braingames_revb_bl
-TARGETS	= braingames_revb_bl
-
-all:	build sizes
+all:	build-bl sizes
 
 clean:
 	cd libopencm3 && make --no-print-directory clean && cd ..
@@ -87,7 +84,7 @@ clean:
 # any file generated during libopencm3 build
 OCM3FILE = libopencm3/include/libopencm3/stm32/f4/nvic.h
 
-build: $(MAKEFILE_LIST) $(OCM3FILE) do-build
+build-bl: $(MAKEFILE_LIST) $(OCM3FILE) do-build
 
 #
 # General rules for making dependency and object files

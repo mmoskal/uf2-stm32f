@@ -2,7 +2,7 @@
 # Common rules for makefiles for the PX4 bootloaders
 #
 
-BUILD_DIR	 = build/$(TARGET_FILE_NAME)
+BUILD_DIR	 = build/$(BOARD)
 
 OBJS		:= $(addprefix $(BUILD_DIR)/, $(patsubst %.c,%.o,$(SRCS)))
 DEPS		:= $(OBJS:.o=.d)
