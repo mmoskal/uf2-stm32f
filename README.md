@@ -17,6 +17,12 @@ The following files will be built:
 
 Build a specific board: Please check the `Makefile` for specific build targets.
 
+## Adding board
+
+Start from `f401` generic board.
+Copy the folder and modify `board.h`.
+To modify settings, use https://microsoft.github.io/uf2/patcher/
+
 ## License
 
 License: LGPL for libopencm3, BSD for what was left of the PX4 bootloader (see LICENSE.md),
