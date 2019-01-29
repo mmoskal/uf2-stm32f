@@ -15,13 +15,11 @@ The following files will be built:
 * `flasher.uf2` - if you already have a UF2 bootloader, you can just drop this on board and it will update the bootloader
 * `flasher16.uf2` - this is similar, but if you have an older UF2 bootloader on the board, that expects the app to start at 16k (`0x08004000`)
 
-Build a specific board: Please check the `Makefile` for specific build targets.
-
 ## Adding board
 
-Start from `f401` generic board.
-Copy the folder and modify `board.h`.
-To modify settings, use https://microsoft.github.io/uf2/patcher/
+Start from `f401` (for 64 pin package) or `f401c` (for 48 pin package) generic board.
+Copy the folder and modify `board.h`, follow instructions at 
+https://arcade.makecode.com/hardware/adding#generating-bootloader
 
 ## License
 
