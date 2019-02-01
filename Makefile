@@ -70,6 +70,8 @@ FLAGS		+= -mthumb $(CPUFLAGS) \
         $(EXTRAFLAGS)
 
 
+OPENOCDALL = $(OPENOCD) -f $(JTAGCONFIG) -f target/stm32$(FN)x.cfg
+
 #
 # Bootloaders to build
 #
@@ -92,14 +94,18 @@ build-bl: $(MAKEFILE_LIST) $(OCM3FILE) do-build
 #
 include rules.mk
 
+flash: upload
+burn: upload
+b: burn
+f: flash
+
 upload: build flash-bootloader
 
 flash-bootloader:
-	$(OPENOCD) -f $(JTAGCONFIG) -f ocd/stm32$(FN)x.cfg \
-                -c "program build/$(BOARD)/bootloader.elf verify reset exit "
+	$(OPENOCDALL) -c "program build/$(BOARD)/bootloader.elf verify reset exit "
 
 gdb:
-	arm-none-eabi-gdb --eval "target remote | $(OPENOCD) -f $(JTAGCONFIG) -f ocd/stm32$(FN)x.cfg -f ocd/debug.cfg" build/$(BOARD)/bootloader.elf
+	arm-none-eabi-gdb --eval "target remote | $(OPENOCDALL) -f ocd/debug.cfg" build/$(BOARD)/bootloader.elf
 
 #
 # Show sizes
@@ -108,6 +114,9 @@ gdb:
 sizes:
 	@-find build/*/ -name '*.elf' -type f | xargs size 2> /dev/null || :
 
+drop:
+	for f in `cd boards; ls` ; do $(MAKE) BOARD=$$f ; done
+	cd build; 7z a uf2-stm32f.zip */bootloader.bin */flasher*uf2
 #
 # Binary management
 #

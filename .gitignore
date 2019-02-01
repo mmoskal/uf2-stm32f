@@ -13,3 +13,4 @@ Bootloader.sublime-workspace
 .vscode
 build
 tmp
+Makefile.user
