@@ -15,6 +15,8 @@
 #include <libopencm3/stm32/timer.h>
 #include <libopencm3/cm3/scb.h>
 
+#include <libopencmsis/core_cm3.h>
+
 #include "bl.h"
 #include <string.h>
 
@@ -152,6 +154,7 @@ static void board_init(void);
 #define APP_RTC_SIGNATURE           0x24a22d12
 #define POWER_DOWN_RTC_SIGNATURE    0x5019684f // Written by app fw to not re-power on.
 #define HF2_RTC_SIGNATURE           0x39a63a78
+#define SLEEP_RTC_SIGNATURE         0x10b37889
 #define BOOT_RTC_REG                MMIO32(RTC_BASE + 0x50)
 
 /* standard clocking for all F4 boards */
@@ -520,6 +523,30 @@ int hf2_mode = 0;
 
 void warning_screen(uint32_t);
 
+#define PWR_CR_LPLVDS (1 << 10)
+void deepsleep() {
+	setup_output_pin(CFG_PIN_JACK_BZEN);
+	setup_output_pin(CFG_PIN_JACK_HPEN);
+	setup_output_pin(CFG_PIN_JACK_PWREN);
+	setup_output_pin(CFG_PIN_JACK_SND);
+
+  screen_sleep();
+
+	RCC_AHB1LPENR = 0x1900F;
+  RCC_AHB2LPENR = 0x0;
+  RCC_APB1LPENR = 0x10000000;
+  RCC_APB2LPENR = 0x00004000;
+
+	PWR_CR |= PWR_CR_FPDS | PWR_CR_LPDS | PWR_CR_LPLVDS;
+	SCB->SCR |= SCB_SCR_SLEEPDEEP;
+
+  // we only wake up with a reset
+	__disable_irq();
+	while(1) {
+		asm("wfi");
+	}
+}
+
 int
 main(void)
 {
@@ -568,6 +595,9 @@ main(void)
 	*/
 	if (bootSig)
 		board_set_rtc_signature(0);
+
+	if (bootSig == SLEEP_RTC_SIGNATURE)
+		deepsleep();
 
 	//bootSig = HF2_RTC_SIGNATURE;
 
