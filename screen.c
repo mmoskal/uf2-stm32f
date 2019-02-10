@@ -347,7 +347,7 @@ void draw_drag() {
     drawBar(52, 55, 8);
     drawBar(107, 14, 4);
 
-    print4(20, 10, 1, "F401");
+    print4(50, 10, 1, "F4");
     print(37, 43, 8, "UF2 v" UF2_VERSION);
     print(3, 110, 1, "arcade.makecode.com");
 
@@ -357,7 +357,7 @@ void draw_drag() {
     printicon(DRAGX + 66, DRAG, 1, arrowLogo);
     printicon(DRAGX + 108, DRAG, 1, pendriveLogo);
     print(1, DRAG - 12, 1, "arcade.uf2");
-    print(90, DRAG - 12, 1, "ARCD-F401");
+    print(89, DRAG - 12, 1, "ARCADE-F4");
 
     draw_screen();
 }
