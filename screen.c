@@ -56,6 +56,12 @@
 #define ST7735_GMCTRP1 0xE0
 #define ST7735_GMCTRN1 0xE1
 
+void screen_delay(unsigned msec) {
+    int k = msec * 15000;
+    while (k--)
+        asm("nop");
+}
+
 void transfer(uint8_t *ptr, uint32_t len) {
     int mosi = CFG(PIN_DISPLAY_MOSI);
     int sck = CFG(PIN_DISPLAY_SCK);
@@ -80,6 +86,11 @@ void transfer(uint8_t *ptr, uint32_t len) {
 }
 
 #define DELAY 0x80
+
+static const uint8_t sleepCmds[] = {
+    ST7735_SLPIN ,  0, 
+    0, 0
+};
 
 // clang-format off
 static const uint8_t initCmds[] = {
@@ -139,7 +150,7 @@ static void sendCmdSeq(const uint8_t *buf) {
         sendCmd(cmdBuf, len + 1);
         buf += len;
         if (v & DELAY) {
-            delay(*buf++);
+            screen_delay(*buf++);
         }
     }
 }
@@ -351,7 +362,8 @@ void draw_drag() {
     draw_screen();
 }
 
-void screen_init() {
+
+static void pre_init() {
     rcc_periph_clock_enable(RCC_GPIOA);
     rcc_periph_clock_enable(RCC_GPIOB);
     rcc_periph_clock_enable(RCC_GPIOC);
@@ -366,14 +378,25 @@ void screen_init() {
     SET_CS(1);
     SET_DC(1);
 
-    pin_set(CFG_PIN_DISPLAY_BL, 1);
-
     pin_set(CFG_PIN_DISPLAY_RST, 0);
-    delay(20);
+    screen_delay(20);
     pin_set(CFG_PIN_DISPLAY_RST, 1);
-    delay(20);
+    screen_delay(20);
+}
+
+void screen_sleep() {
+    pre_init();
+    sendCmdSeq(sleepCmds);
+    SET_CS(0);
+    SET_DC(0);
+}
+
+void screen_init() {
+    pre_init();
 
     sendCmdSeq(initCmds);
+
+    pin_set(CFG_PIN_DISPLAY_BL, 1);
 
     uint32_t cfg0 = CFG(DISPLAY_CFG0);
     uint32_t cfg2 = CFG(DISPLAY_CFG2);

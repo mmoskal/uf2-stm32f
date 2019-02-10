@@ -150,6 +150,7 @@ static inline uint16_t pinmask(int pin) {
 
 extern int hf2_mode;
 
+void screen_sleep();
 void screen_init();
 void draw_drag();
 void draw_hf2();
