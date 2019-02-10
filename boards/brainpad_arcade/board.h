@@ -6,6 +6,7 @@
 #define USBMFGSTRING "GHI Electronics"
 #define BOARD_FLASH_SECTORS 8
 #define BOARD_FLASH_SIZE (512 * 1024)
+#define BOARD_ID "STM32F401-BrainPad-Arcade-RevA"
 
 
 #ifdef DEFINE_CONFIGDATA
