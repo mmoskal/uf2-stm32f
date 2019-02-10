@@ -99,7 +99,7 @@ burn: upload
 b: burn
 f: flash
 
-upload: build flash-bootloader
+upload: build-bl flash-bootloader
 
 flash-bootloader:
 	$(OPENOCDALL) -c "program build/$(BOARD)/bootloader.elf verify reset exit "
