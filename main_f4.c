@@ -154,8 +154,10 @@ static void board_init(void);
 #define APP_RTC_SIGNATURE           0x24a22d12
 #define POWER_DOWN_RTC_SIGNATURE    0x5019684f // Written by app fw to not re-power on.
 #define HF2_RTC_SIGNATURE           0x39a63a78
-#define SLEEP_RTC_SIGNATURE         0x10b37889
+#define SLEEP_RTC_ARG               0x10b37889
+
 #define BOOT_RTC_REG                MMIO32(RTC_BASE + 0x50)
+#define ARG_RTC_REG                MMIO32(RTC_BASE + 0x54)
 
 /* standard clocking for all F4 boards */
 static struct rcc_clock_scale clock_setup = {
@@ -187,13 +189,17 @@ static struct rcc_clock_scale clock_setup = {
 };
 
 static uint32_t
-board_get_rtc_signature()
+board_get_rtc_signature(uint32_t *arg)
 {
 	/* enable the backup registers */
 	PWR_CR |= PWR_CR_DBP;
 	RCC_BDCR |= RCC_BDCR_RTCEN;
 
 	uint32_t result = BOOT_RTC_REG;
+	if (arg) {
+		*arg = ARG_RTC_REG;
+		ARG_RTC_REG = 0;
+	}
 
 	/* disable the backup registers */
 	RCC_BDCR &= RCC_BDCR_RTCEN;
@@ -530,7 +536,65 @@ void deepsleep() {
 	setup_output_pin(CFG_PIN_JACK_PWREN);
 	setup_output_pin(CFG_PIN_JACK_SND);
 
+	// this is needed for the BOOT0 circuit
+	setup_output_pin(CFG_PIN_BTN_MENU2);
+
+#if 1
+	setup_input_pin(CFG_PIN_BTN_A);
+	setup_input_pin(CFG_PIN_BTN_B);
+	setup_input_pin(CFG_PIN_BTN_LEFT);
+	setup_input_pin(CFG_PIN_BTN_RIGHT);
+	setup_input_pin(CFG_PIN_BTN_UP);
+	setup_input_pin(CFG_PIN_BTN_DOWN);
+	setup_input_pin(CFG_PIN_ACCELEROMETER_INT);
+#endif
+
+#if 0
+	setup_output_pin(CFG_PIN_MISO);
+	setup_output_pin(CFG_PIN_MOSI);
+	setup_output_pin(CFG_PIN_SCK);
+	setup_output_pin(CFG_PIN_TX);
+	setup_output_pin(CFG_PIN_RX);
+#endif
+
+
+#if 0
+	setup_input_pin(CFG_PIN_MISO);
+	setup_input_pin(CFG_PIN_MOSI);
+	setup_input_pin(CFG_PIN_SCK);
+	setup_input_pin(CFG_PIN_TX);
+	setup_input_pin(CFG_PIN_RX);
+#endif
+
+
+#if 0
+	int pins[] = {
+		PB_0,
+PB_8,
+PB_14,
+PC_3,
+PC_6,
+PC_15,
+//PD_2,
+PA_1,
+PA_0 
+};
+for (int i =0 ; pins[i]; ++i)
+	setup_input_pin(-pins[i]);
+setup_input_pin(0);
+#endif
+
   screen_sleep();
+
+#if 0
+	setup_output_pin(CFG_PIN_DISPLAY_MOSI);
+	setup_output_pin(CFG_PIN_DISPLAY_MISO);
+	setup_output_pin(CFG_PIN_DISPLAY_SCK);
+	setup_output_pin(CFG_PIN_DISPLAY_CS);
+	setup_output_pin(CFG_PIN_DISPLAY_DC);
+	//setup_input_pin(CFG_PIN_DISPLAY_RST);
+#endif
+
 
 	RCC_AHB1LPENR = 0x1900F;
   RCC_AHB2LPENR = 0x0;
@@ -561,7 +625,7 @@ main(void)
 	/* Here we check for the app setting the POWER_DOWN_RTC_SIGNATURE
 	 * in this case, we reset the signature and wait to die
 	 */
-	if (board_get_rtc_signature() == POWER_DOWN_RTC_SIGNATURE) {
+	if (board_get_rtc_signature(0) == POWER_DOWN_RTC_SIGNATURE) {
 		board_set_rtc_signature(0);
 
 		while (1);
@@ -581,7 +645,8 @@ main(void)
 
 	#else
 
-	uint32_t bootSig = board_get_rtc_signature();
+	uint32_t bootArg = 0;
+	uint32_t bootSig = board_get_rtc_signature(&bootArg);
 
 	if (lookupCfg(CFG_BOOTLOADER_PROTECTION, 0) && (FLASH_OPTCR & 0x80030000)) {
 		warning_screen(bootSig);
@@ -596,7 +661,7 @@ main(void)
 	if (bootSig)
 		board_set_rtc_signature(0);
 
-	if (bootSig == SLEEP_RTC_SIGNATURE)
+	if (bootSig == APP_RTC_SIGNATURE && bootArg == SLEEP_RTC_ARG)
 		deepsleep();
 
 	//bootSig = HF2_RTC_SIGNATURE;

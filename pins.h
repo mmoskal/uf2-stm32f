@@ -48,6 +48,7 @@
 #define PC_13 0x2D
 #define PC_14 0x2E
 #define PC_15 0x2F
+#define PD_2 0x32
 
 
 #define CFG_MAGIC0 0x1e9e10f1

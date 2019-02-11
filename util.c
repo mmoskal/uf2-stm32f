@@ -29,6 +29,8 @@ uint32_t pinport(int pin) {
 
 void setup_pin(int pincfg, int mode, int pull) {
     int pin = lookupCfg(pincfg, -1);
+    if (pincfg <= 0)
+        pin = -pincfg;
     if (pin < 0)
         return;
     uint32_t port = pinport(pin);
@@ -39,6 +41,7 @@ void setup_pin(int pincfg, int mode, int pull) {
 
 void setup_output_pin(int pincfg) {
     setup_pin(pincfg, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE);
+    pin_set(pincfg, 0);
 }
 
 void setup_input_pin(int pincfg) {
@@ -47,6 +50,8 @@ void setup_input_pin(int pincfg) {
 
 void pin_set(int pincfg, int v) {
     int pin = lookupCfg(pincfg, -1);
+    if (pincfg <= 0)
+        pin = -pincfg;
     if (pin < 0)
         return;
     if (v) {
