@@ -14,13 +14,20 @@ __attribute__((section(".config"))) __attribute__((used)) //
 const uint32_t configData[] = {
     /* CF2 START */
     513675505, 539130489, // magic
-    47, 100,  // used entries, total entries
+    55, 100,  // used entries, total entries
     1, 0x2e, // PIN_ACCELEROMETER_INT = PC14
     2, 0x16, // PIN_ACCELEROMETER_SCL = PIN_D6
     3, 0x17, // PIN_ACCELEROMETER_SDA = PIN_D7
     4, 0x11, // PIN_BTN_A = PB01
     5, 0x10, // PIN_BTN_B = PB00
     13, 0x29, // PIN_LED = PC09
+    18, 0x14, // PIN_MISO = PB04
+    19, 0x15, // PIN_MOSI = PB05
+    21, 0x3, // PIN_RX = PA03
+    23, 0x13, // PIN_SCK = PB03
+    24, 0x16, // PIN_SCL = PB06
+    25, 0x17, // PIN_SDA = PB07
+    28, 0x2, // PIN_TX = PA02
     32, 0x1d, // PIN_DISPLAY_SCK = PB13
     33, 0x1e, // PIN_DISPLAY_MISO = PB14
     34, 0x1f, // PIN_DISPLAY_MOSI = PB15
@@ -50,6 +57,7 @@ const uint32_t configData[] = {
     66, 0x28, // PIN_JACK_BUSLED = PC08
     67, 0x29, // PIN_JACK_COMMLED = PC09
     70, 0x38, // ACCELEROMETER_TYPE = MMA8453
+    74, 0x12, // PIN_BTN_MENU2 = PB02
     151, 0x2, // PIN_D1 = PA02
     152, 0x3, // PIN_D2 = PA03
     153, 0x13, // PIN_D3 = PB03
@@ -64,8 +72,7 @@ const uint32_t configData[] = {
     210, 0x10, // PINS_PORT_SIZE = PA_16
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     /* CF2 END */
 };
 #endif
