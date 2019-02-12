@@ -155,6 +155,7 @@ static void board_init(void);
 #define POWER_DOWN_RTC_SIGNATURE    0x5019684f // Written by app fw to not re-power on.
 #define HF2_RTC_SIGNATURE           0x39a63a78
 #define SLEEP_RTC_ARG               0x10b37889
+#define SLEEP2_RTC_ARG              0x7e3353b7
 
 #define BOOT_RTC_REG                MMIO32(RTC_BASE + 0x50)
 #define ARG_RTC_REG                MMIO32(RTC_BASE + 0x54)
@@ -196,10 +197,8 @@ board_get_rtc_signature(uint32_t *arg)
 	RCC_BDCR |= RCC_BDCR_RTCEN;
 
 	uint32_t result = BOOT_RTC_REG;
-	if (arg) {
+	if (arg)
 		*arg = ARG_RTC_REG;
-		ARG_RTC_REG = 0;
-	}
 
 	/* disable the backup registers */
 	RCC_BDCR &= RCC_BDCR_RTCEN;
@@ -533,7 +532,6 @@ void warning_screen(uint32_t);
 
 #define PWR_CR_LPLVDS (1 << 10)
 void deepsleep() {
-	board_set_rtc_signature(APP_RTC_SIGNATURE, 0);
 
 	setup_output_pin(CFG_PIN_JACK_BZEN);
 	setup_output_pin(CFG_PIN_JACK_HPEN);
@@ -580,8 +578,9 @@ void deepsleep() {
 			if (d > 1000)
 				pin_set(CFG_PIN_DISPLAY_BL, 1);
 		}
-		if (d > 1000)
-			scb_reset_system();
+		if (d > 1000) {
+			resetIntoApp();
+		}
 	}
 }
 
@@ -629,8 +628,28 @@ main(void)
 	DMESG("bootsig: %p", bootSig);
 
 
-	if (bootSig == APP_RTC_SIGNATURE && bootArg == SLEEP_RTC_ARG)
+	if (bootSig == APP_RTC_SIGNATURE && bootArg == SLEEP_RTC_ARG) {
+		// next time show instructions
+		board_set_rtc_signature(APP_RTC_SIGNATURE, SLEEP2_RTC_ARG);
 		deepsleep();
+	}
+
+	if (bootSig == APP_RTC_SIGNATURE && bootArg == SLEEP2_RTC_ARG) {
+		screen_init();
+		draw_hold_menu();
+		setup_input_pin(CFG_PIN_BTN_MENU);
+		for (int i = 0; i < 200; ++i) {
+			screen_delay(10);
+			// if they touch MENU while the instruction screen is on,
+			// just stop the sleep and boot into app
+			if (pin_get(CFG_PIN_BTN_MENU) == 0) {
+				bootArg = 0;
+				break;
+			}
+		}
+		if (bootArg)
+			deepsleep();
+	}
 
 	/*
 	* Clear the signature so that if someone resets us while we're

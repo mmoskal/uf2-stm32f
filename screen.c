@@ -342,6 +342,12 @@ void draw_hf2() {
     draw_screen();
 }
 
+void draw_hold_menu() {
+    print4(20, 22, 6, "MENU");
+    print(10, 110, 1, "hold MENU to wake");
+    draw_screen();
+}
+
 void draw_drag() {
     drawBar(0, 52, 10);
     drawBar(52, 55, 8);
