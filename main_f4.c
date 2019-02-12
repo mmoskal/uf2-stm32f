@@ -209,13 +209,14 @@ board_get_rtc_signature(uint32_t *arg)
 }
 
 void
-board_set_rtc_signature(uint32_t sig)
+board_set_rtc_signature(uint32_t sig, uint32_t arg)
 {
 	/* enable the backup registers */
 	PWR_CR |= PWR_CR_DBP;
 	RCC_BDCR |= RCC_BDCR_RTCEN;
 
 	BOOT_RTC_REG = sig;
+	ARG_RTC_REG = arg;
 
 	/* disable the backup registers */
 	RCC_BDCR &= RCC_BDCR_RTCEN;
@@ -283,6 +284,7 @@ static void
 board_init(void)
 {
 	RCC_APB1ENR |= RCC_APB1ENR_PWREN;
+	RCC_APB2ENR |= RCC_APB2ENR_SYSCFGEN;
 	
 	// enable all GPIO clocks
 	RCC_AHB1ENR |= RCC_AHB1ENR_IOPAEN|RCC_AHB1ENR_IOPBEN|RCC_AHB1ENR_IOPCEN|BOARD_CLOCK_VBUS;
@@ -531,6 +533,8 @@ void warning_screen(uint32_t);
 
 #define PWR_CR_LPLVDS (1 << 10)
 void deepsleep() {
+	board_set_rtc_signature(APP_RTC_SIGNATURE, 0);
+
 	setup_output_pin(CFG_PIN_JACK_BZEN);
 	setup_output_pin(CFG_PIN_JACK_HPEN);
 	setup_output_pin(CFG_PIN_JACK_PWREN);
@@ -539,75 +543,45 @@ void deepsleep() {
 	// this is needed for the BOOT0 circuit
 	setup_output_pin(CFG_PIN_BTN_MENU2);
 
-#if 1
 	setup_input_pin(CFG_PIN_BTN_A);
 	setup_input_pin(CFG_PIN_BTN_B);
 	setup_input_pin(CFG_PIN_BTN_LEFT);
 	setup_input_pin(CFG_PIN_BTN_RIGHT);
 	setup_input_pin(CFG_PIN_BTN_UP);
 	setup_input_pin(CFG_PIN_BTN_DOWN);
-	setup_input_pin(CFG_PIN_ACCELEROMETER_INT);
-#endif
-
-#if 0
-	setup_output_pin(CFG_PIN_MISO);
-	setup_output_pin(CFG_PIN_MOSI);
-	setup_output_pin(CFG_PIN_SCK);
-	setup_output_pin(CFG_PIN_TX);
-	setup_output_pin(CFG_PIN_RX);
-#endif
-
-
-#if 0
-	setup_input_pin(CFG_PIN_MISO);
-	setup_input_pin(CFG_PIN_MOSI);
-	setup_input_pin(CFG_PIN_SCK);
-	setup_input_pin(CFG_PIN_TX);
-	setup_input_pin(CFG_PIN_RX);
-#endif
-
-
-#if 0
-	int pins[] = {
-		PB_0,
-PB_8,
-PB_14,
-PC_3,
-PC_6,
-PC_15,
-//PD_2,
-PA_1,
-PA_0 
-};
-for (int i =0 ; pins[i]; ++i)
-	setup_input_pin(-pins[i]);
-setup_input_pin(0);
-#endif
 
   screen_sleep();
 
+	setup_input_pin(CFG_PIN_BTN_MENU);
+
 #if 0
-	setup_output_pin(CFG_PIN_DISPLAY_MOSI);
-	setup_output_pin(CFG_PIN_DISPLAY_MISO);
-	setup_output_pin(CFG_PIN_DISPLAY_SCK);
-	setup_output_pin(CFG_PIN_DISPLAY_CS);
-	setup_output_pin(CFG_PIN_DISPLAY_DC);
-	//setup_input_pin(CFG_PIN_DISPLAY_RST);
-#endif
-
-
 	RCC_AHB1LPENR = 0x1900F;
   RCC_AHB2LPENR = 0x0;
   RCC_APB1LPENR = 0x10000000;
   RCC_APB2LPENR = 0x00004000;
+#endif
 
-	PWR_CR |= PWR_CR_FPDS | PWR_CR_LPDS | PWR_CR_LPLVDS;
-	SCB->SCR |= SCB_SCR_SLEEPDEEP;
-
-  // we only wake up with a reset
 	__disable_irq();
-	while(1) {
-		asm("wfi");
+	
+	for (;;) {
+		enable_exti(CFG_PIN_BTN_MENU);
+	
+		PWR_CR |= PWR_CR_FPDS | PWR_CR_LPDS | PWR_CR_LPLVDS;
+		SCB->SCR |= SCB_SCR_SLEEPDEEP;
+		asm("wfe");
+	
+		clock_init();
+	
+		int d = 0;
+		for (;;d += 50) {
+			screen_delay(50);
+			if (pin_get(CFG_PIN_BTN_MENU) == 1)
+				break;
+			if (d > 1000)
+				pin_set(CFG_PIN_DISPLAY_BL, 1);
+		}
+		if (d > 1000)
+			scb_reset_system();
 	}
 }
 
@@ -626,7 +600,7 @@ main(void)
 	 * in this case, we reset the signature and wait to die
 	 */
 	if (board_get_rtc_signature(0) == POWER_DOWN_RTC_SIGNATURE) {
-		board_set_rtc_signature(0);
+		board_set_rtc_signature(0, 0);
 
 		while (1);
 	}
@@ -654,15 +628,16 @@ main(void)
 
 	DMESG("bootsig: %p", bootSig);
 
+
+	if (bootSig == APP_RTC_SIGNATURE && bootArg == SLEEP_RTC_ARG)
+		deepsleep();
+
 	/*
 	* Clear the signature so that if someone resets us while we're
 	* in the bootloader we'll try to boot next time.
 	*/
 	if (bootSig)
-		board_set_rtc_signature(0);
-
-	if (bootSig == APP_RTC_SIGNATURE && bootArg == SLEEP_RTC_ARG)
-		deepsleep();
+		board_set_rtc_signature(0, 0);
 
 	//bootSig = HF2_RTC_SIGNATURE;
 
@@ -739,7 +714,7 @@ main(void)
 		DMESG("enter bootloader, tmo=%d", timeout);
 
 		// if they hit reset the second time, go to app
-		board_set_rtc_signature(APP_RTC_SIGNATURE);
+		board_set_rtc_signature(APP_RTC_SIGNATURE, 0);
 		
 		/* run the bootloader, come back after an app is uploaded or we time out */
 		bootloader(timeout);
@@ -749,7 +724,7 @@ main(void)
 			continue;
 		}
 
-		board_set_rtc_signature(0);
+		board_set_rtc_signature(0, 0);
 
 		/* look to see if we can boot the app */
 		jump_to_app();
@@ -765,12 +740,12 @@ void flushFlash(void);
 
 void resetIntoApp() {
 	flushFlash();
-	board_set_rtc_signature(APP_RTC_SIGNATURE);
+	board_set_rtc_signature(APP_RTC_SIGNATURE, 0);
 	scb_reset_system();
 }
 
 void resetIntoBootloader() {
 	flushFlash();
-	board_set_rtc_signature(BOOT_RTC_SIGNATURE);
+	board_set_rtc_signature(BOOT_RTC_SIGNATURE, 0);
 	scb_reset_system();
 }

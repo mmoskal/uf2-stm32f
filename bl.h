@@ -139,6 +139,7 @@ void flash_write(uint32_t dst, const uint8_t *src, int len);
 
 void setup_output_pin(int pincfg);
 void setup_input_pin(int pincfg);
+void enable_exti(int pincfg);
 void setup_pin(int pincfg, int mode, int pull);
 void pin_set(int pincfg, int v);
 int pin_get(int pincfg);
@@ -150,6 +151,7 @@ static inline uint16_t pinmask(int pin) {
 
 extern int hf2_mode;
 
+void screen_delay(unsigned msec);
 void screen_sleep();
 void screen_init();
 void draw_drag();
@@ -161,4 +163,4 @@ void drawBar(int y, int h, int c);
 
 void start_systick();
 
-void board_set_rtc_signature(uint32_t sig);
+void board_set_rtc_signature(uint32_t sig, uint32_t arg);
