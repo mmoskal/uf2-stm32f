@@ -48,7 +48,7 @@ void warning_screen(uint32_t bootSig) {
 
     print(10, 20, 2,
           " This bootloader\n"
-          "update may DEMAGE\n"
+          "update may DAMAGE\n"
           "  your device!");
 
     draw_menu();
