@@ -14,7 +14,7 @@ __attribute__((section(".config"))) __attribute__((used)) //
 const uint32_t configData[] = {
     /* CF2 START */
     513675505, 539130489, // magic
-    55, 100,  // used entries, total entries
+    57, 100,  // used entries, total entries
     1, 0x2e, // PIN_ACCELEROMETER_INT = PC14
     2, 0x16, // PIN_ACCELEROMETER_SCL = PIN_D6
     3, 0x17, // PIN_ACCELEROMETER_SDA = PIN_D7
@@ -70,9 +70,11 @@ const uint32_t configData[] = {
     208, 0x16e42d61, // BOOTLOADER_BOARD_ID = 0x16e42d61
     209, 0x57755a57, // UF2_FAMILY = STM32F401
     210, 0x10, // PINS_PORT_SIZE = PA_16
+    211, 0x1, // BOOTLOADER_PROTECTION = 1
+    212, 0x78, // timeout = 120
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     /* CF2 END */
 };
 #endif
