@@ -537,6 +537,7 @@ void deepsleep() {
 	setup_output_pin(CFG_PIN_JACK_HPEN);
 	setup_output_pin(CFG_PIN_JACK_PWREN);
 	setup_output_pin(CFG_PIN_JACK_SND);
+	setup_output_pin(CFG_PIN_SPEAKER_AMP);
 
 	// this is needed for the BOOT0 circuit
 	setup_output_pin(CFG_PIN_BTN_MENU2);
