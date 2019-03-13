@@ -101,11 +101,20 @@ f: flash
 
 upload: build-bl flash-bootloader
 
-flash-bootloader:
+
+BMP = $(shell ls -1 /dev/cu.usbmodem* | head -1)
+BMP_ARGS = -ex "target extended-remote $(BMP)" -ex "mon swdp_scan" -ex "attach 1"
+GDB = arm-none-eabi-gdb
+
+flash-ocd:
 	$(OPENOCDALL) -c "program build/$(BOARD)/bootloader.elf verify reset exit "
 
+flash-bootloader:
+	$(GDB) $(BMP_ARGS) -ex "load" -ex "quit" build/$(BOARD)/bootloader.elf
+
+
 gdb:
-	arm-none-eabi-gdb --eval "target remote | $(OPENOCDALL) -f ocd/debug.cfg" build/$(BOARD)/bootloader.elf
+	$(GDB) $(BMP_ARGS) build/$(BOARD)/bootloader.elf
 
 #
 # Show sizes
