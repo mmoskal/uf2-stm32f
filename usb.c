@@ -253,6 +253,11 @@ usb_cinit(void)
 	usbd_dev = usbd_init(&otgfs_usb_driver, &dev, &config, &bos, usb_strings, NUM_USB_STRINGS,
 			     usbd_control_buffer, sizeof(usbd_control_buffer));
 
+#if defined(BOARD_USB_VBUS_SENSE_DISABLED)
+	// disable VBUS sensing
+	OTG_FS_GCCFG &= ~(OTG_GCCFG_VBUSASEN | OTG_GCCFG_VBUSBSEN);
+#endif
+
 #elif defined(STM32F1)
 	rcc_peripheral_enable_clock(&RCC_APB2ENR, RCC_APB2ENR_IOPAEN);
 	gpio_set(GPIOA, GPIO8);
