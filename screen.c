@@ -4,8 +4,16 @@
 
 #include <string.h>
 
+void printicon(int x, int y, int col, const uint8_t *icon);
+#define DEFINE_CUSTOM_LOGO 1
+
 #include "pins.h"
 #include "bl.h"
+
+#ifndef CUSTOM_LOGO
+#define CUSTOM_LOGO  /* nothing */
+#endif
+
 
 #define DISPLAY_WIDTH 160
 #define DISPLAY_HEIGHT 128
@@ -348,14 +356,24 @@ void draw_hold_menu() {
     draw_screen();
 }
 
+void print4border(int x, int y, int c, const char *str) {
+    print4(x - 1, y - 1, 15, str);
+    print4(x + 1, y - 1, 15, str);
+    print4(x - 1, y + 1, 15, str);
+    print4(x + 1, y + 1, 15, str);
+    print4(x, y, c, str);
+}
+
 void draw_drag() {
     drawBar(0, 52, 10);
     drawBar(52, 55, 8);
     drawBar(107, 14, 4);
 
-    print4(108, 5, 1, "F4");
+    print4border(109, 5, 1, "F4");
     print(112, 40, 8, "v" UF2_VERSION);
     print(23, 110, 1, "arcade.makecode.com");
+
+    CUSTOM_LOGO;
 
 #define DRAG 70
 #define DRAGX 10
