@@ -125,7 +125,7 @@ sizes:
 
 drop:
 	for f in `cd boards; ls` ; do $(MAKE) BOARD=$$f ; done
-	cd build; 7z a uf2-stm32f.zip */bootloader.bin */flasher*uf2
+	cd build; 7z a uf2-stm32f.zip */bootloader.elf */bootloader.bin */flasher.uf2
 #
 # Binary management
 #
