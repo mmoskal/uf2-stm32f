@@ -14,7 +14,7 @@ __attribute__((section(".config"))) __attribute__((used)) //
 const uint32_t configData[] = {
     /* CF2 START */
     513675505, 539130489, // magic
-    28, 100,  // used entries, total entries
+    29, 100,  // used entries, total entries
     4, 0x15, // PIN_BTN_A = PB05
     5, 0x14, // PIN_BTN_B = PB04
     26, 0x10, // PIN_SPEAKER_AMP = PB00
@@ -33,7 +33,7 @@ const uint32_t configData[] = {
     48, 0xf, // PIN_BTN_RIGHT = PA15
     49, 0x6, // PIN_BTN_UP = PA06
     50, 0xa, // PIN_BTN_DOWN = PA10
-    51, 0x0, // PIN_BTN_MENU = PA00
+    51, 0x110000, // PIN_BTN_MENU = 0x110000
     59, 0x80, // SPEAKER_VOLUME = 128
     60, 0x2, // PIN_JACK_TX = PA02
     65, 0x8, // PIN_JACK_SND = PA08
@@ -43,18 +43,14 @@ const uint32_t configData[] = {
     209, 0x57755a57, // UF2_FAMILY = STM32F401
     210, 0x10, // PINS_PORT_SIZE = PA_16
     211, 0x0, // BOOTLOADER_PROTECTION = 0
+    212, 0x78, // POWER_DEEPSLEEP_TIMEOUT = 120
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     /* CF2 END */
 };
 #endif
 
 #endif /* BOARD_H */
-
-
-
-
-
