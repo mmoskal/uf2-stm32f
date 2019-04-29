@@ -36,6 +36,7 @@ void setup_pin(int pincfg, int mode, int pull) {
         pin = -pincfg;
     if (pin < 0)
         return;
+    pin &= 0xff;
     uint32_t port = pinport(pin);
     uint32_t mask = pinmask(pin);
     gpio_mode_setup(port, mode, pull, mask);
@@ -73,8 +74,14 @@ void setup_output_pin(int pincfg) {
     pin_set(pincfg, 0);
 }
 
+bool is_active_high(int pincfg) {
+    int pin = lookupCfg(pincfg, -1);
+    return (pin >= 0 && (pin & 0x110000) == 0x110000);
+}
+
 void setup_input_pin(int pincfg) {
-    setup_pin(pincfg, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP);
+    int pull = is_active_high(pincfg) ? GPIO_PUPD_PULLDOWN : GPIO_PUPD_PULLUP;
+    setup_pin(pincfg, GPIO_MODE_INPUT, pull);
 }
 
 void pin_set(int pincfg, int v) {
@@ -83,6 +90,9 @@ void pin_set(int pincfg, int v) {
         pin = -pincfg;
     if (pin < 0)
         return;
+    if (pin & 0x10000)
+        v = !v;
+    pin &= 0xff;
     if (v) {
         gpio_set(pinport(pin), pinmask(pin));
     } else {
@@ -94,7 +104,9 @@ int pin_get(int pincfg) {
     int pin = lookupCfg(pincfg, -1);
     if (pin < 0)
         return 1;
-    return gpio_get(pinport(pin), pinmask(pin)) != 0;
+    pin &= 0xff;
+    int v = gpio_get(pinport(pin), pinmask(pin));
+    return is_active_high(pincfg) ? v == 0 : v != 0;
 }
 
 extern const uint32_t configData[];
