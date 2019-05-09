@@ -37,6 +37,7 @@ const uint32_t configData[] = {
     59, 0x80, // SPEAKER_VOLUME = 128
     60, 0x2, // PIN_JACK_TX = PA02
     65, 0x8, // PIN_JACK_SND = PA08
+    67, 0x1e, // PIN_JACK_COMMLED = PB14
     204, 0x80000, // FLASH_BYTES = 0x80000
     205, 0x20000, // RAM_BYTES = 0x20000
     208, 0x69d51bac, // BOOTLOADER_BOARD_ID = 0x69d51bac
