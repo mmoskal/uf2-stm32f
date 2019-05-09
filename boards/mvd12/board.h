@@ -14,7 +14,7 @@ __attribute__((section(".config"))) __attribute__((used)) //
 const uint32_t configData[] = {
     /* CF2 START */
     513675505, 539130489, // magic
-    29, 100,  // used entries, total entries
+    30, 100,  // used entries, total entries
     4, 0x15, // PIN_BTN_A = PB05
     5, 0x14, // PIN_BTN_B = PB04
     26, 0x10, // PIN_SPEAKER_AMP = PB00
@@ -37,6 +37,7 @@ const uint32_t configData[] = {
     59, 0x80, // SPEAKER_VOLUME = 128
     60, 0x2, // PIN_JACK_TX = PA02
     65, 0x8, // PIN_JACK_SND = PA08
+    67, 0x1e, // PIN_JACK_COMMLED = PB14
     204, 0x80000, // FLASH_BYTES = 0x80000
     205, 0x20000, // RAM_BYTES = 0x20000
     208, 0x69d51bac, // BOOTLOADER_BOARD_ID = 0x69d51bac
@@ -48,7 +49,7 @@ const uint32_t configData[] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     /* CF2 END */
 };
 #endif
