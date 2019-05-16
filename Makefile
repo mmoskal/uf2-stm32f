@@ -102,7 +102,7 @@ f: flash
 upload: build-bl flash-bootloader
 
 
-BMP = $(shell ls -1 /dev/cu.usbmodem* | head -1)
+BMP = $(shell ls -1 /dev/cu.usbmodem*1 | head -1)
 BMP_ARGS = -ex "target extended-remote $(BMP)" -ex "mon swdp_scan" -ex "attach 1"
 GDB = arm-none-eabi-gdb
 
