@@ -26,7 +26,7 @@ void flash_bootloader(void) {
 
     uint32_t dst = 0x08000000;
 
-    if (memcmp((void*)dst, bindata, BINDATA_SIZE) == 0) {
+    if (memcmp((void *)dst, bindata, BINDATA_SIZE) == 0) {
         screen_init();
         print(3, 3, 6, "You already have\nthis bootloader");
         print(3, 100, 5, "Press reset");
@@ -52,10 +52,12 @@ void flash_bootloader(void) {
         flash_program_word(dst + i, *(uint32_t *)(bindata + i));
     }
 
-    if (memcmp((void*)dst, bindata, BINDATA_SIZE) != 0) {
-        screen_init();
-        print(3, 3, 6, "Failed to erase!");
-        draw_screen();
+    if (memcmp((void *)dst, bindata, BINDATA_SIZE) != 0) {
+        if (hasScreen()) {
+            screen_init();
+            print(3, 3, 6, "Failed to erase!");
+            draw_screen();
+        }
         for (;;)
             ;
     }
@@ -64,15 +66,19 @@ void flash_bootloader(void) {
     flash_program_word((uint32_t)vector_table, 0);
     flash_program_word((uint32_t)vector_table + 4, 0);
 
-    // write-protect
-    optcr &= ~0x00030000;
-    flash_program_option_bytes(optcr);
+    if (lookupCfg(CFG_BOOTLOADER_PROTECTION, 0)) {
+        // write-protect
+        optcr &= ~0x00030000;
+        flash_program_option_bytes(optcr);
+    }
 
-    screen_init();
-    print(3, 3, 6, "Bootloader updated!");
-    print4(3, 40, 4, "Yay:)");
-    print(3, 100, 5, "Press reset");
-    draw_screen();
+    if (hasScreen()) {
+        screen_init();
+        print(3, 3, 6, "Bootloader updated!");
+        print4(3, 40, 4, "Yay:)");
+        print(3, 100, 5, "Press reset");
+        draw_screen();
+    }
 
     for (;;) {
         led_off(LED_BOOTLOADER);
