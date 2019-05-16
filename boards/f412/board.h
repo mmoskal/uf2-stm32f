@@ -17,18 +17,17 @@ const uint32_t configData[] = {
     4, 0x20, // PIN_BTN_A = PC00
     5, 0x21, // PIN_BTN_B = PC01
     13, 0x10, // PIN_LED = PB00
-    32, 0x5, // PIN_DISPLAY_SCK = PA05
-    33, 0x6, // PIN_DISPLAY_MISO = PA06
-    34, 0x7, // PIN_DISPLAY_MOSI = PA07
-    35, 0x1c, // PIN_DISPLAY_CS = PB12
-    36, 0x14, // PIN_DISPLAY_DC = PB04
-    37, 0xa0, // DISPLAY_WIDTH = 160
-    38, 0x80, // DISPLAY_HEIGHT = 128
-    39, 0x80, // DISPLAY_CFG0 = 0x80
-    40, 0x603, // DISPLAY_CFG1 = 0x603
-    41, 0x16, // DISPLAY_CFG2 = 0x16
-    43, 0x2c, // PIN_DISPLAY_RST = PC12
-    44, 0x19, // PIN_DISPLAY_BL = PB09
+    33, 0x34, // PIN_DISPLAY_MISO = PD04
+    34, 0x35, // PIN_DISPLAY_MOSI = PD05
+    35, 0x37, // PIN_DISPLAY_CS = PD07
+    36, 0x50, // PIN_DISPLAY_DC = PF00
+    37, 0x140, // DISPLAY_WIDTH = 320
+    38, 0xf0, // DISPLAY_HEIGHT = 240
+    39, 0x8, // DISPLAY_CFG0 = 0x8
+    40, 0x18ff, // DISPLAY_CFG1 = 0x18ff
+    41, 0x1000004, // DISPLAY_CFG2 = 0x1000004
+    43, 0x3b, // PIN_DISPLAY_RST = PD11
+    44, 0x55, // PIN_DISPLAY_BL = PF05
     47, 0x4, // PIN_BTN_LEFT = PA04
     48, 0x29, // PIN_BTN_RIGHT = PC09
     49, 0x15, // PIN_BTN_UP = PB05
@@ -38,6 +37,7 @@ const uint32_t configData[] = {
     65, 0x8, // PIN_JACK_SND = PA08
     66, 0x10, // PIN_JACK_BUSLED = PB00
     67, 0x11, // PIN_JACK_COMMLED = PB01
+    78, 0x247d, // _78 = 9341
     204, 0x80000, // FLASH_BYTES = 0x80000
     205, 0x18000, // RAM_BYTES = 0x18000
     208, 0x1f884ff3, // BOOTLOADER_BOARD_ID = 0x1f884ff3
@@ -53,4 +53,3 @@ const uint32_t configData[] = {
 #endif
 
 #endif /* BOARD_H */
-
