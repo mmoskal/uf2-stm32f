@@ -622,7 +622,7 @@ main(void)
 	uint32_t bootArg = 0;
 	uint32_t bootSig = board_get_rtc_signature(&bootArg);
 
-	if (lookupCfg(CFG_BOOTLOADER_PROTECTION, 0) && (FLASH_OPTCR & 0x80030000)) {
+	if (hasScreen() && lookupCfg(CFG_BOOTLOADER_PROTECTION, 0) && (FLASH_OPTCR & 0x80030000)) {
 		warning_screen(bootSig);
 	}
 

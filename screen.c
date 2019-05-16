@@ -4,16 +4,16 @@
 
 #include <string.h>
 
-void printicon(int x, int y, int col, const uint8_t *icon);
+static void printicon(int x, int y, int col, const uint8_t *icon);
+
 #define DEFINE_CUSTOM_LOGO 1
 
 #include "pins.h"
 #include "bl.h"
 
 #ifndef CUSTOM_LOGO
-#define CUSTOM_LOGO  /* nothing */
+#define CUSTOM_LOGO /* nothing */
 #endif
-
 
 #define DISPLAY_WIDTH 160
 #define DISPLAY_HEIGHT 128
@@ -64,6 +64,10 @@ void printicon(int x, int y, int col, const uint8_t *icon);
 #define ST7735_GMCTRP1 0xE0
 #define ST7735_GMCTRN1 0xE1
 
+bool hasScreen() {
+    return lookupCfg(CFG_PIN_DISPLAY_SCK, -1) != -1;
+}
+
 void screen_delay(unsigned msec) {
     int k = msec * 15000;
     while (k--)
@@ -95,10 +99,7 @@ void transfer(uint8_t *ptr, uint32_t len) {
 
 #define DELAY 0x80
 
-static const uint8_t sleepCmds[] = {
-    ST7735_SLPIN ,  0, 
-    0, 0
-};
+static const uint8_t sleepCmds[] = {ST7735_SLPIN, 0, 0, 0};
 
 // clang-format off
 static const uint8_t initCmds[] = {
@@ -241,7 +242,7 @@ static void printch4(int x, int y, int col, const uint8_t *fnt) {
     }
 }
 
-void printicon(int x, int y, int col, const uint8_t *icon) {
+static void printicon(int x, int y, int col, const uint8_t *icon) {
     int w = *icon++;
     int h = *icon++;
     int sz = *icon++;
@@ -345,18 +346,24 @@ void drawBar(int y, int h, int c) {
 }
 
 void draw_hf2() {
+    if (!hasScreen())
+        return;
+
     print4(20, 22, 5, "<-->");
     print(40, 110, 7, "flashing...");
     draw_screen();
 }
 
 void draw_hold_menu() {
+    if (!hasScreen())
+        return;
+
     print4(20, 22, 6, "MENU");
     print(10, 110, 1, "hold MENU to wake");
     draw_screen();
 }
 
-void print4border(int x, int y, int c, const char *str) {
+static void print4border(int x, int y, int c, const char *str) {
     print4(x - 1, y - 1, 15, str);
     print4(x + 1, y - 1, 15, str);
     print4(x - 1, y + 1, 15, str);
@@ -365,6 +372,9 @@ void print4border(int x, int y, int c, const char *str) {
 }
 
 void draw_drag() {
+    if (!hasScreen())
+        return;
+
     drawBar(0, 52, 10);
     drawBar(52, 55, 8);
     drawBar(107, 14, 4);
@@ -386,8 +396,10 @@ void draw_drag() {
     draw_screen();
 }
 
+static bool pre_init() {
+    if (!hasScreen())
+        return false;
 
-static void pre_init() {
     rcc_periph_clock_enable(RCC_GPIOA);
     rcc_periph_clock_enable(RCC_GPIOB);
     rcc_periph_clock_enable(RCC_GPIOC);
@@ -406,17 +418,21 @@ static void pre_init() {
     screen_delay(20);
     pin_set(CFG_PIN_DISPLAY_RST, 1);
     screen_delay(20);
+
+    return true;
 }
 
 void screen_sleep() {
-    pre_init();
+    if (!pre_init())
+        return;
     sendCmdSeq(sleepCmds);
     SET_CS(0);
     SET_DC(0);
 }
 
 void screen_init() {
-    pre_init();
+    if (!pre_init())
+        return;
 
     sendCmdSeq(initCmds);
 

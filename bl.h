@@ -157,6 +157,7 @@ void screen_init();
 void draw_drag();
 void draw_hf2();
 void draw_hold_menu();
+bool hasScreen();
 void print(int x, int y, int col, const char *text);
 void draw_screen();
 void print4(int x, int y, int col, const char *text);
