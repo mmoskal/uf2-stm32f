@@ -13,7 +13,7 @@ __attribute__((section(".config"))) __attribute__((used)) //
 const uint32_t configData[] = {
     /* CF2 START */
     513675505, 539130489,  // magic
-    58,        100,        // used entries, total entries
+    59,        100,        // used entries, total entries
     1,         0x2e,       // PIN_ACCELEROMETER_INT = PC14
     2,         0x16,       // PIN_ACCELEROMETER_SCL = PIN_SCL
     3,         0x17,       // PIN_ACCELEROMETER_SDA = PIN_SDA
@@ -58,6 +58,7 @@ const uint32_t configData[] = {
     67,        0x29,       // PIN_JACK_COMMLED = PC09
     70,        0x38,       // ACCELEROMETER_TYPE = MMA8453
     74,        0x12,       // PIN_BTN_MENU2 = PB02
+    93,        0x110028,   // PIN_USB_POWER = 0x110028
     151,       0x2,        // PIN_D1 = PA02
     152,       0x3,        // PIN_D2 = PA03
     153,       0x13,       // PIN_D3 = PB03
@@ -75,7 +76,7 @@ const uint32_t configData[] = {
     0,         0,          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0,         0,          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0,         0,          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0,         0,          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0,         0,          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     /* CF2 END */
 };
 #endif
