@@ -229,7 +229,7 @@ board_test_force_pin()
 	/* two pins strapped together */
 	volatile unsigned samples = 0;
 	volatile unsigned vote = 0;
-
+	
 	for (volatile unsigned cycles = 0; cycles < 10; cycles++) {
 		gpio_set(BOARD_FORCE_BL_PORT, BOARD_FORCE_BL_PIN_OUT);
 
@@ -293,6 +293,8 @@ board_init(void)
 
 	setup_output_pin(CFG_PIN_LED);
 	setup_output_pin(CFG_PIN_LED1);
+
+	setup_input_pin(CFG_PIN_USB_POWER);
 
 	initSerialNumber();
 }
@@ -686,6 +688,12 @@ main(void)
 	}
 
 	if (bootSig == APP_RTC_SIGNATURE) {
+		try_boot = true;
+	}
+
+	// normally, CFG_PIN_USB_POWER is configured with is_active_high(),
+	// which means results from pin_get() are reversed
+	if (lookupCfg(CFG_PIN_USB_POWER, -1) != -1 && pin_get(CFG_PIN_USB_POWER) != 0) {
 		try_boot = true;
 	}
 
