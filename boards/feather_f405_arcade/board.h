@@ -5,7 +5,7 @@
 #define USBDEVICESTRING "Feather F405 Arcade"
 #define USBMFGSTRING "Adafruit"
 #define BOARD_FLASH_SECTORS 8
-#define BOARD_FLASH_SIZE (512 * 1024)
+#define BOARD_FLASH_SIZE (1024 * 1024)
 
 #ifdef DEFINE_CONFIGDATA
 __attribute__((section(".config"))) __attribute__((used)) //
