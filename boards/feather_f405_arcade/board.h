@@ -12,7 +12,7 @@ __attribute__((section(".config"))) __attribute__((used)) //
 const uint32_t configData[] = {
     /* CF2 START */
     513675505, 539130489, // magic
-    42, 100,  // used entries, total entries
+    43, 100,  // used entries, total entries
     4, 0x27, // PIN_BTN_A = PIN_D5
     5, 0x26, // PIN_BTN_B = PIN_D6
     32, 0x1d, // PIN_DISPLAY_SCK = PB13
@@ -55,10 +55,11 @@ const uint32_t configData[] = {
     210, 0x10, // PINS_PORT_SIZE = PA_16
     211, 0x0, // BOOTLOADER_PROTECTION = 0
     212, 0x78, // POWER_DEEPSLEEP_TIMEOUT = 120
+    214, 0xa8, // CPU_MHZ = 168
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     /* CF2 END */
 };
 #endif
