@@ -300,6 +300,14 @@ board_init(void)
 
 	setup_input_pin(CFG_PIN_USB_POWER);
 
+#if defined(BOARD_FORCE_BL_PIN)
+	/* configure the force BL pins */
+
+	gpio_mode_setup(BOARD_FORCE_BL_PORT, GPIO_MODE_INPUT,
+		BOARD_FORCE_BL_STATE ? GPIO_PUPD_PULLDOWN : GPIO_PUPD_PULLUP,
+		BOARD_FORCE_BL_PIN);
+#endif
+
 	initSerialNumber();
 }
 
