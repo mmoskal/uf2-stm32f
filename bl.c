@@ -255,7 +255,8 @@ void bootloader(unsigned timeout) {
             return;
         }
 
-        if (!timeout || timer[TIMER_BL_WAIT] > 10000 || hf2_mode) {
+        if (hasScreen() &&
+            (!timeout || timer[TIMER_BL_WAIT] > 10000 || hf2_mode)) {
             if (!screen_on) {
                 screen_on = 1;
                 screen_init();
