@@ -351,6 +351,7 @@ static void write_block_core(uint32_t block_no, const uint8_t *data, bool quiet,
         // DBG("wr %d=%d (of %d)", state->numWritten, bl->blockNo, bl->numBlocks);
     }
 
+    // if the next block is not received within 500 ms, reset
     if (!isSet && !quiet) {
         uf2_timer_start(500);
     }
