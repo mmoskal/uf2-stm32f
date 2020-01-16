@@ -24,6 +24,22 @@ uint32_t pinport(int pin) {
         return GPIOB;
     case 2:
         return GPIOC;
+    case 3:
+        return GPIOD;
+    case 4:
+        return GPIOE;
+    case 5:
+        return GPIOF;
+    case 6:
+        return GPIOG;
+    case 7:
+        return GPIOH;
+    case 8:
+        return GPIOI;
+    case 9:
+        return GPIOJ;
+    case 10:
+        return GPIOK;
     default:
         panic();
         return 0;

@@ -27,12 +27,22 @@ void flash_bootloader(void) {
     uint32_t dst = 0x08000000;
 
     if (memcmp((void *)dst, bindata, BINDATA_SIZE) == 0) {
-        screen_init();
-        print(3, 3, 6, "You already have\nthis bootloader");
-        print(3, 100, 5, "Press reset");
-        draw_screen();
-        for (;;)
-            ;
+        if (hasScreen()) {
+            screen_init();
+            print(3, 3, 6, "You already have\nthis bootloader");
+            print(3, 100, 5, "Press reset");
+            draw_screen();
+        }
+        for (;;) {
+            led_off(LED_ACTIVITY);
+            delay(500);
+            led_on(LED_ACTIVITY);
+            delay(100);
+            led_off(LED_ACTIVITY);
+            delay(100);
+            led_on(LED_ACTIVITY);
+            delay(100);
+        }
     }
 
     uint32_t optcr = FLASH_OPTCR;
@@ -58,8 +68,12 @@ void flash_bootloader(void) {
             print(3, 3, 6, "Failed to erase!");
             draw_screen();
         }
-        for (;;)
-            ;
+        for (;;) {
+            led_off(LED_ACTIVITY);
+            delay(300);
+            led_on(LED_ACTIVITY);
+            delay(300);
+        }
     }
 
     // self-destruct
@@ -81,9 +95,9 @@ void flash_bootloader(void) {
     }
 
     for (;;) {
-        led_off(LED_BOOTLOADER);
+        led_off(LED_ACTIVITY);
         delay(300);
-        led_on(LED_BOOTLOADER);
+        led_on(LED_ACTIVITY);
         delay(100);
     }
 
