@@ -167,8 +167,8 @@ static void sendCmdSeq(const uint8_t *buf) {
 static uint32_t palXOR;
 
 static void setAddrWindow(int x, int y, int w, int h) {
-    uint8_t cmd0[] = {ST7735_RASET, 0, (uint8_t)x, 0, (uint8_t)(x + w - 1)};
-    uint8_t cmd1[] = {ST7735_CASET, 0, (uint8_t)y, 0, (uint8_t)(y + h - 1)};
+    uint8_t cmd0[] = {ST7735_RASET, (uint8_t)x>>8, (uint8_t)x, (uint8_t)((x + w - 1)>>8), (uint8_t)(x + w - 1)};
+    uint8_t cmd1[] = {ST7735_CASET, (uint8_t)y>>8, (uint8_t)y, (uint8_t)((y + h - 1)>>8), (uint8_t)(y + h - 1)};
     sendCmd(cmd1, sizeof(cmd1));
     sendCmd(cmd0, sizeof(cmd0));
 }
@@ -320,22 +320,47 @@ void print4(int x, int y, int col, const char *text) {
     }
 }
 
+
 void draw_screen() {
+    uint32_t cfg0 = CFG(DISPLAY_CFG0);
+    uint32_t offX = (cfg0 >> 8) & 0xff;
+    uint32_t offY = (cfg0 >> 16) & 0xff;
+    
+    SET_CS(0);
+    SET_DC(0);
     cmdBuf[0] = ST7735_RAMWR;
-    sendCmd(cmdBuf, 1);
+    transfer(cmdBuf, 1);
 
     SET_DC(1);
-    SET_CS(0);
-
+    //SET_CS(0);
     uint8_t *p = fb;
-    for (int i = 0; i < DISPLAY_WIDTH; ++i) {
-        for (int j = 0; j < DISPLAY_HEIGHT; ++j) {
-            uint16_t color = palette[*p++ & 0xf];
-            uint8_t cc[] = {color >> 8, color & 0xff};
-            transfer(cc, 2);
+    if (CFG(DISPLAY_TYPE) != 9341){
+        for (int i = 0; i < DISPLAY_WIDTH; ++i) {
+            for (int j = 0; j < DISPLAY_HEIGHT; ++j) {
+                uint16_t color = palette[*p++ & 0xf];
+                uint8_t cc[] = {color >> 8, color & 0xff};
+                transfer(cc, 2);
+            }
         }
     }
-
+    else{
+        // ILI9341(320x240) DISPLAY
+        for (int i = 0; i < DISPLAY_WIDTH; ++i) {
+            for (int j = 0; j < DISPLAY_HEIGHT - 8; j++) {
+                uint16_t color = palette[*(p+j) & 0xf];
+                uint8_t cc[] = {color >> 8, color & 0xff};
+                transfer(cc, 2);
+                transfer(cc, 2);
+            }
+            for (int j = 0; j < DISPLAY_HEIGHT - 8; j++) {
+                uint16_t color = palette[*(p+j) & 0xf];
+                uint8_t cc[] = {color >> 8, color & 0xff};
+                transfer(cc, 2);
+                transfer(cc, 2);
+            }
+            p += DISPLAY_HEIGHT;
+        }
+    }
     SET_CS(1);
 }
 
