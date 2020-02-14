@@ -2,7 +2,7 @@
 #define BOARD_H
 
 #define OSC_FREQ 25
-#define USBDEVICESTRING "Arcade F401C"
+#define USBDEVICESTRING "miniF4"
 #define USBMFGSTRING "Contoso Ltd."
 #define BOARD_FLASH_SECTORS 8
 #define BOARD_FLASH_SIZE (512 * 1024)
