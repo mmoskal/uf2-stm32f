@@ -334,7 +334,7 @@ void draw_screen() {
     SET_DC(1);
     //SET_CS(0);
     uint8_t *p = fb;
-    if (CFG(DISPLAY_TYPE) != 9341){
+    if (lookupCfg(CFG_DISPLAY_TYPE, 7735) != 9341){
         for (int i = 0; i < DISPLAY_WIDTH; ++i) {
             for (int j = 0; j < DISPLAY_HEIGHT; ++j) {
                 uint16_t color = palette[*p++ & 0xf];
@@ -343,7 +343,7 @@ void draw_screen() {
             }
         }
     }
-    else{
+   else{
         // ILI9341(320x240) DISPLAY
         for (int i = 0; i < DISPLAY_WIDTH; ++i) {
             for (int j = 0; j < DISPLAY_HEIGHT - 8; j++) {
