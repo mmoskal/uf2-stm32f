@@ -709,6 +709,10 @@ main(void)
 		try_boot = true;
 	}
 
+#ifdef BOARD_SKIP_USB
+	try_boot = true;
+#endif
+
 	/*
 	 * Check if the force-bootloader pins are strapped; if strapped,
 	 * don't try booting.
