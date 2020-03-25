@@ -23,7 +23,7 @@ const uint32_t configData[] = {
     CFG_PIN_BTN_A, 0x2D, // PC_13
     204, 0x80000, // FLASH_BYTES = 0x80000
     205, 0x18000, // RAM_BYTES = 0x18000
-    208, 0x1f884ff3, // BOOTLOADER_BOARD_ID = 0x1f884ff3
+    208, 0x2d89a8a6, // BOOTLOADER_BOARD_ID = 0x2d89a8a6
     209, 0x57755a57, // UF2_FAMILY = STM32F401
     210, 0x10, // PINS_PORT_SIZE = PA_16
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
