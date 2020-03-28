@@ -16,6 +16,7 @@ const uint32_t configData[] = {
     /* CF2 START */
     513675505, 539130489, // magic
     32, 100,  // used entries, total entries
+    CFG_PIN_LED,  0, // PA_0 red
     CFG_PIN_LED1, 0, // PA_0 red
     CFG_PIN_LED2, 1, // PA_1 green
     CFG_PIN_LED3, 2, // PA_2 orange
