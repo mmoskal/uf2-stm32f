@@ -1,4 +1,4 @@
-#define UF2_VERSION "2.7.6"
+#define UF2_VERSION "2.8.1"
 #ifndef BOARD_ID
 #define BOARD_ID "STM32F4xx-Arcade-Generic"
 #endif
