@@ -19,7 +19,7 @@ export OPENOCD	?= openocd
 
 JTAGCONFIG ?= interface/stlink-v2.cfg
 
-export BOARD ?= f401
+export BOARD ?= f412
 -include boards/$(BOARD)/board.mk
 
 # Default to F401; override in board.mk if needed
