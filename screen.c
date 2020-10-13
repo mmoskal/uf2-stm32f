@@ -70,7 +70,7 @@ static void printicon(int x, int y, int col, const uint8_t *icon);
 #define FSMC_CmdWrite(cmd) *(volatile uint8_t *)(FSMC_BASE0) = (cmd)
 #define FSMC_DataWrite(data) *(volatile uint8_t *)(FSMC_BASE1) = (data)
 
-static uint32_t palXOR;
+static int isSPI;
 
 bool hasScreen() {
     return lookupCfg(CFG_PIN_DISPLAY_MOSI, -1) != -1;
@@ -84,7 +84,7 @@ void screen_delay(unsigned msec) {
 
 void transfer(uint8_t *ptr, uint32_t len) {
     uint8_t b;
-    if (lookupCfg(CFG_DISPLAY_TYPE, 7735) == 7735) {
+    if (isSPI) {
         int mosi = CFG(PIN_DISPLAY_MOSI);
         int sck = CFG(PIN_DISPLAY_SCK);
         assert(pinport(mosi) == pinport(sck));
@@ -106,12 +106,8 @@ void transfer(uint8_t *ptr, uint32_t len) {
             *port = sck_mask << 16;
         }
     } else {
-        for (;;) {
-            if (!len--)
-                break;
-            b = *ptr++;
-            FSMC_DataWrite(b);
-        }
+        while (len--)
+            FSMC_DataWrite(*ptr++);
     }
 }
 
@@ -221,9 +217,11 @@ static void sendCmd(uint8_t *buf, int len) {
     if (buf != cmdBuf)
         memcpy(cmdBuf, buf, len);
     buf = cmdBuf;
-    if (lookupCfg(CFG_DISPLAY_TYPE, 7735) == 7735) {
+    int cs = 0;
+    if (isSPI) {
         SET_DC(0);
-        // SET_CS(0);
+        SET_CS(0);
+        cs = 1;
         transfer(buf, 1);
         SET_DC(1);
     } else {
@@ -233,7 +231,8 @@ static void sendCmd(uint8_t *buf, int len) {
     buf++;
     if (len > 0)
         transfer(buf, len);
-    // SET_CS(1);
+    if (cs)
+        SET_CS(1);
 }
 
 static void sendCmdSeq(const uint8_t *buf) {
@@ -252,46 +251,24 @@ static void sendCmdSeq(const uint8_t *buf) {
 }
 
 static void setAddrWindow(int x, int y, int w, int h) {
-    if (lookupCfg(CFG_DISPLAY_TYPE, 7735) == 7735) {
-        uint8_t cmd0[] = {ST7735_RASET, (uint8_t)x >> 8, (uint8_t)x, (uint8_t)((x + w - 1) >> 8),
-                          (uint8_t)(x + w - 1)};
-        uint8_t cmd1[] = {ST7735_CASET, (uint8_t)y >> 8, (uint8_t)y, (uint8_t)((y + h - 1) >> 8),
-                          (uint8_t)(y + h - 1)};
-        sendCmd(cmd1, sizeof(cmd1));
-        sendCmd(cmd0, sizeof(cmd0));
-    } else {
-        FSMC_CmdWrite(0x2A); // column addr
-        FSMC_DataWrite((y >> 8) & 0xFF);
-        FSMC_DataWrite(y & 0xFF);
-        FSMC_DataWrite(((y + h - 1) >> 8) & 0xFF);
-        FSMC_DataWrite((y + h - 1) & 0xFF);
-        FSMC_CmdWrite(0x2B); // page addr
-        FSMC_DataWrite((x >> 8) & 0xFF);
-        FSMC_DataWrite(x & 0xFF);
-        FSMC_DataWrite(((x + w - 1) >> 8) & 0xFF);
-        FSMC_DataWrite((x + w - 1) & 0xFF);
-    }
+    uint8_t cmd0[] = {ST7735_RASET, (uint8_t)x >> 8, (uint8_t)x, (uint8_t)((x + w - 1) >> 8),
+                      (uint8_t)(x + w - 1)};
+    uint8_t cmd1[] = {ST7735_CASET, (uint8_t)y >> 8, (uint8_t)y, (uint8_t)((y + h - 1) >> 8),
+                      (uint8_t)(y + h - 1)};
+    sendCmd(cmd1, sizeof(cmd1));
+    sendCmd(cmd0, sizeof(cmd0));
 }
 
 static void configure(uint8_t madctl, uint32_t frmctr1, uint32_t palXOR) {
-    if (lookupCfg(CFG_DISPLAY_TYPE, 7735) == 7735) {
-        uint8_t cmd0[] = {ST7735_MADCTL, madctl};
-        uint8_t cmd1[] = {ST7735_FRMCTR1, (uint8_t)(frmctr1 >> 16), (uint8_t)(frmctr1 >> 8),
-                          (uint8_t)frmctr1};
-        sendCmd(cmd0, sizeof(cmd0));
-        sendCmd(cmd1, cmd1[3] == 0xff ? 3 : 4);
-    } else {
-        FSMC_CmdWrite(0x36); // mem access ctrl
-        FSMC_DataWrite(madctl);
-        FSMC_CmdWrite(0xB1); // frame rate
-        FSMC_DataWrite((frmctr1 >> 16) & 0xff);
-        FSMC_DataWrite((frmctr1 >> 8) & 0xff);
-        if ((frmctr1 & 0xff) != 0xff) {
-            FSMC_DataWrite(frmctr1 & 0xff);
-        }
-        if (palXOR) {
-            FSMC_CmdWrite(0x21);
-        }
+    uint8_t cmd0[] = {ST7735_MADCTL, madctl};
+    uint8_t cmd1[] = {ST7735_FRMCTR1, (uint8_t)(frmctr1 >> 16), (uint8_t)(frmctr1 >> 8),
+                      (uint8_t)frmctr1};
+    sendCmd(cmd0, sizeof(cmd0));
+    sendCmd(cmd1, cmd1[3] == 0xff ? 3 : 4);
+
+    if (palXOR) {
+        uint8_t cmd2[] = {ST7735_INVON};
+        sendCmd(cmd2, sizeof(cmd2));
     }
 }
 
@@ -439,7 +416,6 @@ void draw_screen() {
     uint32_t offX = (cfg0 >> 8) & 0xff;
     uint32_t offY = (cfg0 >> 16) & 0xff;
 
-    // SET_CS(0);
     uint8_t *p = fb;
     if (lookupCfg(CFG_DISPLAY_TYPE, 7735) == 7735) {
         SET_DC(0);
@@ -447,7 +423,7 @@ void draw_screen() {
         transfer(cmdBuf, 1);
 
         SET_DC(1);
-        // SET_CS(0);
+        SET_CS(0);
         for (int i = 0; i < DISPLAY_WIDTH; ++i) {
             for (int j = 0; j < DISPLAY_HEIGHT; ++j) {
                 uint16_t color = palette[*p++ & 0xf];
@@ -455,6 +431,7 @@ void draw_screen() {
                 transfer(cc, 2);
             }
         }
+        SET_CS(1);
     } else {
         // ILI9341/st7789(320*240*p8b) DISPLAY
         FSMC_CmdWrite(0x2C); // mem write
@@ -474,7 +451,6 @@ void draw_screen() {
             p += DISPLAY_HEIGHT;
         }
     }
-    // SET_CS(1);
 }
 
 void drawBar(int y, int h, int c) {
@@ -575,6 +551,8 @@ static bool pre_init() {
     pin_set(CFG_PIN_DISPLAY_RST, 1);
     screen_delay(20);
 
+    isSPI = lookupCfg(CFG_DISPLAY_TYPE, 7735) == 7735;
+
     return true;
 }
 
@@ -599,7 +577,7 @@ void screen_init() {
     uint32_t cfg0 = CFG(DISPLAY_CFG0);
     uint32_t cfg2 = CFG(DISPLAY_CFG2);
     uint32_t frmctr1 = CFG(DISPLAY_CFG1);
-    palXOR = (cfg0 & 0x1000000) ? 0xffffff : 0x000000;
+    uint32_t palXOR = (cfg0 & 0x1000000) ? 0xffffff : 0x000000;
     uint32_t madctl = cfg0 & 0xff;
     uint32_t offX = (cfg0 >> 8) & 0xff;
     uint32_t offY = (cfg0 >> 16) & 0xff;
