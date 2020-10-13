@@ -228,6 +228,11 @@ usb_cinit(void)
 	rcc_peripheral_enable_clock(&RCC_AHB1ENR, RCC_AHB1ENR_IOPAEN);
 	rcc_peripheral_enable_clock(&RCC_AHB2ENR, RCC_AHB2ENR_OTGFSEN);
 
+#ifdef BL_F412
+	RCC_AHB2RSTR |= (RCC_AHB2RSTR_OTGFSRST);
+	RCC_AHB2RSTR &= ~(RCC_AHB2RSTR_OTGFSRST);
+#endif
+
 #if defined(USB_FORCE_DISCONNECT)
 	gpio_mode_setup(GPIOA, GPIO_MODE_OUTPUT, GPIO_OTYPE_OD, GPIO12);
 	gpio_set_output_options(GPIOA, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, GPIO12);
@@ -246,14 +251,14 @@ usb_cinit(void)
 	gpio_mode_setup(GPIOA, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO11 | GPIO12);
 	gpio_set_af(GPIOA, GPIO_AF10, GPIO11 | GPIO12);
 
-#if defined(BOARD_USB_VBUS_SENSE_DISABLED)
+#if defined(BOARD_USB_VBUS_SENSE_DISABLED) && !defined(BL_F412)
 	OTG_FS_GCCFG |= OTG_GCCFG_NOVBUSSENS;
 #endif
 
 	usbd_dev = usbd_init(&otgfs_usb_driver, &dev, &config, &bos, usb_strings, NUM_USB_STRINGS,
 			     usbd_control_buffer, sizeof(usbd_control_buffer));
 
-#if defined(BOARD_USB_VBUS_SENSE_DISABLED)
+#if defined(BOARD_USB_VBUS_SENSE_DISABLED) && !defined(BL_F412)
 	// disable VBUS sensing
 	OTG_FS_GCCFG &= ~(OTG_GCCFG_VBUSASEN | OTG_GCCFG_VBUSBSEN);
 #endif
@@ -279,7 +284,9 @@ usb_cinit(void)
 
 	if (OTG_FS_CID == OTG_CID_HAS_VBDEN) {
 
+#if !defined(BOARD_USB_VBUS_SENSE_DISABLED)
 		OTG_FS_GCCFG |= OTG_GCCFG_VBDEN | OTG_GCCFG_PWRDWN;
+#endif
 
 		/* Set the Soft Connect (STMF32446, STMF32469 comes up disconnected) */
 
