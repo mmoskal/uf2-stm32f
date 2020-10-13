@@ -530,7 +530,7 @@ static bool pre_init() {
     } else { // init the fsmc for ili9341/st7789(320*240*p8b)
         rcc_peripheral_enable_clock(&RCC_AHB3ENR, RCC_AHB3ENR_FSMCEN);
         FSMC_BCR1 = FSMC_BCR_EXTMOD | FSMC_BCR_WREN | 0x80;
-        FSMC_BWTR1 |= (CFG(DISPLAY_CFG2) & 0xff) << 8;
+        FSMC_BWTR1 = 0xff00010 | ((CFG(DISPLAY_CFG2) & 0xff) << 8);
         FSMC_BCR1 |= FSMC_BCR_MBKEN;
         gpio_mode_setup(GPIOA, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO2 | GPIO3 | GPIO4 | GPIO5);
         gpio_set_af(GPIOA, GPIO_AF12, GPIO2 | GPIO3 | GPIO4 | GPIO5);
@@ -540,9 +540,8 @@ static bool pre_init() {
         gpio_set_af(GPIOC, GPIO_AF10, GPIO6 | GPIO11 | GPIO12);
         gpio_mode_setup(GPIOC, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO2 | GPIO3 | GPIO5);
         gpio_set_af(GPIOC, GPIO_AF12, GPIO2 | GPIO3 | GPIO5);
+        SET_CS(0);
     }
-
-    SET_CS(0);
 
     pin_set(CFG_PIN_DISPLAY_RST, 1);
     screen_delay(20);
