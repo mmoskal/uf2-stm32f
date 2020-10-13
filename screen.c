@@ -217,11 +217,8 @@ static void sendCmd(uint8_t *buf, int len) {
     if (buf != cmdBuf)
         memcpy(cmdBuf, buf, len);
     buf = cmdBuf;
-    int cs = 0;
     if (isSPI) {
         SET_DC(0);
-        SET_CS(0);
-        cs = 1;
         transfer(buf, 1);
         SET_DC(1);
     } else {
@@ -231,8 +228,6 @@ static void sendCmd(uint8_t *buf, int len) {
     buf++;
     if (len > 0)
         transfer(buf, len);
-    if (cs)
-        SET_CS(1);
 }
 
 static void sendCmdSeq(const uint8_t *buf) {
@@ -416,14 +411,14 @@ void draw_screen() {
     uint32_t offX = (cfg0 >> 8) & 0xff;
     uint32_t offY = (cfg0 >> 16) & 0xff;
 
-    uint8_t *p = fb;
-    if (lookupCfg(CFG_DISPLAY_TYPE, 7735) == 7735) {
-        SET_DC(0);
-        cmdBuf[0] = ST7735_RAMWR;
-        transfer(cmdBuf, 1);
+    cmdBuf[0] = ST7735_RAMWR;
+    sendCmd(cmdBuf, 1);
 
+    uint8_t *p = fb;
+    if (isSPI)
         SET_DC(1);
-        SET_CS(0);
+    
+    if (lookupCfg(CFG_DISPLAY_TYPE, 7735) == 7735) {
         for (int i = 0; i < DISPLAY_WIDTH; ++i) {
             for (int j = 0; j < DISPLAY_HEIGHT; ++j) {
                 uint16_t color = palette[*p++ & 0xf];
@@ -431,10 +426,8 @@ void draw_screen() {
                 transfer(cc, 2);
             }
         }
-        SET_CS(1);
     } else {
         // ILI9341/st7789(320*240*p8b) DISPLAY
-        FSMC_CmdWrite(0x2C); // mem write
         for (int i = 0; i < DISPLAY_WIDTH; ++i) {
             for (int j = 0; j < DISPLAY_HEIGHT - 8; j++) {
                 uint16_t color = palette[*(p + j) & 0xf];
@@ -523,7 +516,9 @@ static bool pre_init() {
     setup_output_pin(CFG_PIN_DISPLAY_RST);
     setup_output_pin(CFG_PIN_DISPLAY_CS);
 
-    if (lookupCfg(CFG_DISPLAY_TYPE, 7735) == 7735) {
+    isSPI = (int)lookupCfg(CFG_PIN_DISPLAY_SCK, -1) != -1;
+
+    if (isSPI) {
         setup_output_pin(CFG_PIN_DISPLAY_MOSI);
         setup_output_pin(CFG_PIN_DISPLAY_DC);
         SET_DC(1);
@@ -540,8 +535,10 @@ static bool pre_init() {
         gpio_set_af(GPIOC, GPIO_AF10, GPIO6 | GPIO11 | GPIO12);
         gpio_mode_setup(GPIOC, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO2 | GPIO3 | GPIO5);
         gpio_set_af(GPIOC, GPIO_AF12, GPIO2 | GPIO3 | GPIO5);
-        SET_CS(0);
     }
+
+    // just keep it low all the time; we're not multiplexing anything anyways
+    SET_CS(0);
 
     pin_set(CFG_PIN_DISPLAY_RST, 1);
     screen_delay(20);
@@ -550,20 +547,16 @@ static bool pre_init() {
     pin_set(CFG_PIN_DISPLAY_RST, 1);
     screen_delay(20);
 
-    isSPI = lookupCfg(CFG_DISPLAY_TYPE, 7735) == 7735;
-
     return true;
 }
 
 void screen_sleep() {
     if (!pre_init())
         return;
-    if (lookupCfg(CFG_DISPLAY_TYPE, 7735) == 7735) {
+    if (isSPI) {
         sendCmdSeq(sleepCmds);
-        // SET_CS(0);
         SET_DC(0);
     } else {
-        // SET_CS(0);
         FSMC_CmdWrite(0x10);
     }
 }
@@ -588,9 +581,9 @@ void screen_init() {
     } else if (lookupCfg(CFG_DISPLAY_TYPE, 7735) == 7789) { // init the screen st7789
         sendCmdSeq(initCmds7789);
         DMESG("configure screen st7789: FRMCTR1=%p MADCTL=%p FSMC", frmctr1, madctl);
-    } else { // init the screen ili9341
+    } else {
         sendCmdSeq(initCmds9341);
-        DMESG("configure screen st7789: FRMCTR1=%p MADCTL=%p FSMC", frmctr1, madctl);
+        DMESG("configure screen ili9341: FRMCTR1=%p MADCTL=%p FSMC", frmctr1, madctl);
     }
     configure(madctl, frmctr1, palXOR);
     setAddrWindow(offX, offY, CFG(DISPLAY_WIDTH), CFG(DISPLAY_HEIGHT));
