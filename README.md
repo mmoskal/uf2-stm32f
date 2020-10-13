@@ -21,6 +21,22 @@ Start from `f401` (for 64 pin package) or `f401c` (for 48 pin package) generic b
 Copy the folder and modify `board.h`, follow instructions at 
 https://arcade.makecode.com/hardware/adding#generating-bootloader
 
+### Pullups on USB data lines
+
+If you have a hardware pull up on USB data line, you may need the following in your `board.h` file:
+
+```c
+#define USB_FORCE_DISCONNECT 1
+```
+
+### F412
+
+The F412 has a different USB module. In the `board.h` you will most likely want to add like this:
+
+```c
+#define BL_F412 1
+```
+
 ## License
 
 License: LGPL for libopencm3, BSD for what was left of the PX4 bootloader (see LICENSE.md),
