@@ -36,14 +36,14 @@ $(BINARY):	$(ELF)
 	$(OBJCOPY) -O binary $(ELF) $(BINARY)
 
 $(UF2): $(FL_OBJS) $(BINARY)
-	python uf2/utils/uf2conv.py --carray $(BINARY) -o $(BUILD_DIR)/bootloader.c
+	python3 uf2/utils/uf2conv.py --carray $(BINARY) -o $(BUILD_DIR)/bootloader.c
 	$(CC) -c $(FLAGS) -o $(BUILD_DIR)/bootloader.o $(BUILD_DIR)/bootloader.c
 	$(CC) -o $(BUILD_DIR)/flasher.elf $(FL_OBJS) $(BUILD_DIR)/bootloader.o $(FLAGS:.ld=-flasher.ld)
 	$(OBJCOPY) -O binary $(BUILD_DIR)/flasher.elf $(BUILD_DIR)/flasher.bin
-	python uf2/utils/uf2conv.py -c -f 0x57755a57 -b 0x08010000 $(BUILD_DIR)/flasher.bin -o $(BUILD_DIR)/flasher.uf2
+	python3 uf2/utils/uf2conv.py -c -f 0x57755a57 -b 0x08010000 $(BUILD_DIR)/flasher.bin -o $(BUILD_DIR)/flasher.uf2
 	$(CC) -o $(BUILD_DIR)/flasher16.elf $(FL_OBJS) $(BUILD_DIR)/bootloader.o $(FLAGS:.ld=-flasher16.ld)
 	$(OBJCOPY) -O binary $(BUILD_DIR)/flasher16.elf $(BUILD_DIR)/flasher16.bin
-	python uf2/utils/uf2conv.py -c -f 0x57755a57 -b 0x08008000 $(BUILD_DIR)/flasher16.bin -o $(BUILD_DIR)/flasher16.uf2
+	python3 uf2/utils/uf2conv.py -c -f 0x57755a57 -b 0x08008000 $(BUILD_DIR)/flasher16.bin -o $(BUILD_DIR)/flasher16.uf2
 
 # Dependencies for .o files
 -include $(DEPS)
