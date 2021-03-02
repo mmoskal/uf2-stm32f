@@ -251,8 +251,13 @@ usb_cinit(void)
 	gpio_mode_setup(GPIOA, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO11 | GPIO12);
 	gpio_set_af(GPIOA, GPIO_AF10, GPIO11 | GPIO12);
 
-#if defined(BOARD_USB_VBUS_SENSE_DISABLED) && !defined(BL_F412)
+#if defined(BOARD_USB_VBUS_SENSE_DISABLED) 
+#ifdef BL_F412
+	//OTG_FS_GUSBCFG &= ~(OTG_GUSBCFG_SRPCAP|OTG_GUSBCFG_HNPCAP);
+	OTG_FS_GOTGCTL |= (1 << 6) | (1 << 7); // override VBUS sense value
+#else
 	OTG_FS_GCCFG |= OTG_GCCFG_NOVBUSSENS;
+#endif
 #endif
 
 	usbd_dev = usbd_init(&otgfs_usb_driver, &dev, &config, &bos, usb_strings, NUM_USB_STRINGS,
@@ -260,7 +265,12 @@ usb_cinit(void)
 
 #if defined(BOARD_USB_VBUS_SENSE_DISABLED) && !defined(BL_F412)
 	// disable VBUS sensing
+#ifdef BL_F412
+	//OTG_FS_GUSBCFG &= ~(OTG_GUSBCFG_SRPCAP|OTG_GUSBCFG_HNPCAP);
+	//OTG_FS_GOTGCTL |= (1 << 6) | (1 << 7);
+#else
 	OTG_FS_GCCFG &= ~(OTG_GCCFG_VBUSASEN | OTG_GCCFG_VBUSBSEN);
+#endif
 #endif
 
 #elif defined(STM32F1)
