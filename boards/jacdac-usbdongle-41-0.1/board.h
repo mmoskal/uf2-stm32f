@@ -20,14 +20,14 @@ const uint32_t configData[] = {
     54, 0x10006, // LED B
     60, 0x2, // PIN_JACK_TX = PA02
     100, 0xA, // ILIM_ENABLE A0
-    101, 0x10007, // LED R A3
-    102, 0x10010, // LED G A4
-    103, 0x10006, // LED B A5
-    104, 0x8, // ILIM_STATUS A1
-    105, 0x16, // ILIM_CTRL A2
+    101, 0x8, // ILIM_STATUS A1
+    102, 0x16, // ILIM_CTRL A2
+    103, 0x7, // LED R A3
+    104, 0x10, // LED G A4
+    105, 0x6, // LED B A5
     204, 0x80000, // FLASH_BYTES = 0x80000
     205, 0x20000, // RAM_BYTES = 0x20000
-    208, 0x6e93b3ba, // BOOTLOADER_BOARD_ID = 0x6e93b3ba
+    208, 0x69d51bac, // BOOTLOADER_BOARD_ID = 0x69d51bac
     209, 0x57755a57, // UF2_FAMILY = STM32F401
     210, 0x10, // PINS_PORT_SIZE = PA_16
     211, 0x0, // BOOTLOADER_PROTECTION = 0
