@@ -32,7 +32,11 @@ CPUFLAGS ?= -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16
 # f7: -mcpu=cortex-m7 -mfloat-abi=hard -mfpu=fpv5-sp-d16
 
 LINKER_FILE ?= linker/stm32$(FN).ld 
-EXTRAFLAGS ?= -D$(CPUTYPE)
+ifeq ($(origin EXTRAFLAGS), undefined)
+	EXTRAFLAGS ?= -D$(CPUTYPE)
+else
+	EXTRAFLAGS += -D$(CPUTYPE)
+endif
 
 #
 # Common configuration
