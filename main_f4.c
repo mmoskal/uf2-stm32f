@@ -633,6 +633,14 @@ main(void)
 
 	#else
 
+#ifdef APP_ON_POR
+	if (RCC_CSR & RCC_CSR_PORRSTF) {
+		try_boot = true;
+	}
+#endif
+
+	RCC_CSR |= RCC_CSR_RMVF; // clear reset reason
+
 	uint32_t bootArg = 0;
 	uint32_t bootSig = board_get_rtc_signature(&bootArg);
 

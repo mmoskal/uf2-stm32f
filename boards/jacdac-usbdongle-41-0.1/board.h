@@ -8,6 +8,10 @@
 #define BOARD_FLASH_SIZE (512 * 1024)
 #define BOARD_ID "Jacdac USB Dongle 41-0.1"
 
+#define VOLUME_LABEL "JACDACF4"
+
+#define APP_ON_POR 1
+
 #ifdef DEFINE_CONFIGDATA
 __attribute__((section(".config"))) __attribute__((used)) //
 const uint32_t configData[] = {
