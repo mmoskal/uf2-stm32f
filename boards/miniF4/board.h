@@ -23,18 +23,18 @@ const uint32_t configData[] = {
     35, 0x4, // PIN_DISPLAY_CS = PA04
     36, 0x3, // PIN_DISPLAY_DC = PA03
 //////////////// For ST7735(160x128)
-    37, 0xa0, // DISPLAY_WIDTH = 160
-    38, 0x80, // DISPLAY_HEIGHT = 128
-    39, 0x020180, // DISPLAY_CFG0 = 0x80 ST7735(160x128 GreenTAB)
-    40, 0x603, // DISPLAY_CFG1 = 0x603
-    41, 0x16, // DISPLAY_CFG2 = 0x16
+//    37, 0xa0, // DISPLAY_WIDTH = 160
+//    38, 0x80, // DISPLAY_HEIGHT = 128
+//    39, 0x020180, // DISPLAY_CFG0 = 0x80 ST7735(160x128 GreenTAB)
+//    40, 0x603, // DISPLAY_CFG1 = 0x603
+//    41, 0x16, // DISPLAY_CFG2 = 0x16
 /////////////// For ILI9341(320x240)
-//    37, 320,    // DISPLAY_WIDTH = 320
-//    38, 240,    // DISPLAY_HEIGHT = 240
-//    39, 0x08,   // DISPLAY_CFG0 = 0x08
-//    40, 0x0010ff,   // DISPLAY_CFG1 = 0x10ff
-//    41, 50,         // DISPLAY_CFG2 = 0x50
-//    78, 9341,   // DISPLAY_TYPE = ILI9341
+    37, 320,    // DISPLAY_WIDTH = 320
+    38, 240,    // DISPLAY_HEIGHT = 240
+    39, 0x08,   // DISPLAY_CFG0 = 0x08
+    40, 0x0010ff,   // DISPLAY_CFG1 = 0x10ff
+    41, 50,         // DISPLAY_CFG2 = 0x50
+    78, 9341,   // DISPLAY_TYPE = ILI9341
 ///////////////////////////////////
     43, 0x1, // PIN_DISPLAY_RST = PA01
     44, 0x2, // PIN_DISPLAY_BL = PA02
